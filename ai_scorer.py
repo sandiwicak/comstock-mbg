@@ -1,8 +1,11 @@
-"""AI Scorer - Groq Vision API (baca dari config.json)."""
+"""AI Scorer - Groq Vision API dengan retry."""
 import requests
 import base64
 import json
 import os
+import time
+from PIL import Image
+from io import BytesIO
 
 
 def get_groq_key():
@@ -14,43 +17,57 @@ def get_groq_key():
     return ""
 
 
+def compress_image(image_bytes, max_size=1024):
+    """Compress gambar biar tidak terlalu besar."""
+    try:
+        img = Image.open(BytesIO(image_bytes))
+        # Resize kalau lebih besar dari max_size
+        if max(img.size) > max_size:
+            ratio = max_size / max(img.size)
+            new_size = tuple(int(dim * ratio) for dim in img.size)
+            img = img.resize(new_size, Image.LANCZOS)
+        # Convert ke RGB kalau RGBA
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
+        # Save ke bytes
+        buffer = BytesIO()
+        img.save(buffer, format="JPEG", quality=85)
+        return buffer.getvalue()
+    except Exception:
+        return image_bytes
+
+
 def prediksi_skor_dari_foto(image_bytes):
-    """Prediksi skor Comstock dari foto. Return dict atau None."""
+    """Prediksi skor Comstock dari foto dengan retry."""
     try:
         api_key = get_groq_key()
-
         if not api_key:
             return None
 
+        # Compress dulu
+        image_bytes = compress_image(image_bytes)
         img_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
         prompt = """
         Anda ahli gizi menganalisa foto tray makanan MBG Indonesia.
-
-        Tray kompartemen:
-        - Kiri atas: SAYUR
-        - Kiri bawah: LAUK
-        - Kanan atas: NASI
-        - Bawah: BUAH
-
-        Fokus pada NASI, SAYUR, dan LAUK.
-
+        Kompartemen: kiri atas SAYUR, kiri bawah LAUK, kanan atas NASI, bawah BUAH.
+        Fokus NASI, SAYUR, LAUK.
         Tentukan skor Comstock 0-5:
-        0 = Habis total (0% sisa)
-        1 = Tersisa 1/4 porsi (25% sisa)
-        2 = Tersisa 1/2 porsi (50% sisa)
-        3 = Tersisa 3/4 porsi (75% sisa)
-        4 = Hampir utuh (95% sisa)
-        5 = Utuh (100% sisa)
-
+        0 = Habis total, 1 = Tersisa 1/4, 2 = Tersisa 1/2,
+        3 = Tersisa 3/4, 4 = Hampir utuh, 5 = Utuh.
         Jawab HANYA JSON:
         {"nasi": 0, "sayur": 0, "lauk": 0, "confidence": 0.0, "alasan": "..."}
         """
 
         url = "https://api.groq.com/openai/v1/chat/completions"
 
-        payload = {
-            "model": "qwen/qwen3.8-27b",
+        # Coba 2 model
+        models = [
+            "qwen/qwen3.8-27b",
+            "meta-llama/llama-4-scout-17b-16e-instruct"
+        ]
+
+        payload_base = {
             "messages": [
                 {
                     "role": "user",
@@ -74,23 +91,41 @@ def prediksi_skor_dari_foto(image_bytes):
             "Authorization": "Bearer " + api_key
         }
 
-        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        # Retry 3 kali, coba tiap model
+        for attempt in range(3):
+            for model in models:
+                try:
+                    payload = dict(payload_base)
+                    payload["model"] = model
 
-        if response.status_code != 200:
-            return None
+                    response = requests.post(url, json=payload, headers=headers, timeout=30)
 
-        data = response.json()
-        text = data["choices"][0]["message"]["content"]
-        text = text.strip()
+                    if response.status_code == 200:
+                        data = response.json()
+                        text = data["choices"][0]["message"]["content"]
+                        text = text.strip()
 
-        if "```" in text:
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        text = text.strip()
+                        if "```" in text:
+                            text = text.split("```")[1]
+                            if text.startswith("json"):
+                                text = text[4:]
+                        text = text.strip()
 
-        result = json.loads(text)
-        return result
+                        result = json.loads(text)
+                        return result
+
+                    elif response.status_code == 429:
+                        # Rate limit, tunggu
+                        time.sleep(2)
+                        continue
+
+                except Exception:
+                    continue
+
+            # Jeda antar attempt
+            time.sleep(1)
+
+        return None
 
     except Exception:
         return None
