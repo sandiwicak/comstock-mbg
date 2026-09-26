@@ -1,35 +1,25 @@
-"""AI Scorer - Gemini Vision untuk deteksi skor Comstock."""
+"""AI Scorer - Gemini Vision."""
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 from io import BytesIO
 import json
 
-def prediksi_skor_dari_foto(image_bytes):
-    """
-    Analisa foto sisa makanan dengan Gemini Vision.
-    Return: dict {nasi, sayur, lauk, confidence, alasan} atau None
-    """
+def get_gemini_key():
+    """Ambil API key Gemini, gabung dari 2 bagian."""
     try:
-        # ============ DEBUG: Tampilkan isi Secrets ============
-        try:
-            all_keys = list(st.secrets.keys())
-            st.write(f"🔍 Debug: Secrets keys = {all_keys}")
-            
-            if "GEMINI_API_KEY" in st.secrets:
-                key_val = st.secrets["GEMINI_API_KEY"]
-                st.write(f"🔍 Debug: GEMINI_API_KEY ADA ✅ (panjang: {len(key_val)} char)")
-                st.write(f"🔍 Debug: 10 char pertama: {key_val[:10]}...")
-            else:
-                st.write("🔍 Debug: GEMINI_API_KEY TIDAK ADA ❌")
-        except Exception as e_debug:
-            st.write(f"🔍 Debug error: {e_debug}")
-        # =====================================================
+        part1 = st.secrets.get("GEMINI_KEY_PART1", "")
+        part2 = st.secrets.get("GEMINI_KEY_PART2", "")
+        return part1 + part2
+    except Exception:
+        return ""
+
+def prediksi_skor_dari_foto(image_bytes):
+    try:
+        api_key = get_gemini_key()
         
-        # Ambil API key dari secrets
-        api_key = st.secrets.get("GEMINI_API_KEY", "")
         if not api_key:
-            st.warning("⚠️ GEMINI_API_KEY belum di-set di Secrets.")
+            st.warning("⚠️ GEMINI_API_KEY tidak tersedia.")
             return None
         
         genai.configure(api_key=api_key)
@@ -43,12 +33,10 @@ def prediksi_skor_dari_foto(image_bytes):
         Tray kompartemen:
         - Kiri atas: SAYUR
         - Kiri bawah: LAUK
-        - Kanan atas: NASI (biasanya kosong karena dipindah)
+        - Kanan atas: NASI
         - Bawah: BUAH
         
-        Fokus pada NASI, SAYUR, dan LAUK.
-        
-        Tentukan skor Comstock 0-5 untuk setiap komponen:
+        Tentukan skor Comstock 0-5 untuk NASI, SAYUR, LAUK:
         - 0 = Habis total (0% sisa)
         - 1 = Tersisa 1/4 porsi (25% sisa)
         - 2 = Tersisa 1/2 porsi (50% sisa)
@@ -62,14 +50,13 @@ def prediksi_skor_dari_foto(image_bytes):
             "sayur": <skor 0-5>,
             "lauk": <skor 0-5>,
             "confidence": <0.0-1.0>,
-            "alasan": "<penjelasan singkat>"
+            "alasan": "<penjelasan>"
         }
         """
         
         response = model.generate_content([prompt, img])
         text = response.text.strip()
         
-        # Bersihkan markdown code block
         if "```" in text:
             text = text.split("```")[1]
             if text.startswith("json"):
