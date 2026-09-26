@@ -1,31 +1,29 @@
-"""AI Scorer - Gemini via google-genai SDK (paling stabil)."""
-import os
+"""AI Scorer - Groq Vision API."""
+import requests
+import base64
 import json
+import os
 import streamlit as st
-from google import genai
-from PIL import Image
-from io import BytesIO
 
 
-def get_gemini_key():
-    """Ambil API key Gemini dari credentials.json."""
+def get_groq_key():
+    """Ambil API key Groq dari credentials.json."""
     if os.path.exists("credentials.json"):
         with open("credentials.json") as f:
             config = json.load(f)
-            return config.get("gemini_api_key", "")
+            return config.get("groq_api_key", "")
     return ""
 
 
 def prediksi_skor_dari_foto(image_bytes):
     try:
-        api_key = get_gemini_key()
+        api_key = get_groq_key()
 
         if not api_key:
-            st.error("GEMINI key tidak ada di credentials.json")
+            st.error("GROQ key tidak ada di credentials.json")
             return None
 
-        client = genai.Client(api_key=api_key)
-        img = Image.open(BytesIO(image_bytes))
+        img_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
         prompt = """
         Anda ahli gizi menganalisa foto tray makanan MBG Indonesia.
@@ -36,14 +34,47 @@ def prediksi_skor_dari_foto(image_bytes):
         {"nasi": 0, "sayur": 0, "lauk": 0, "confidence": 0.0, "alasan": "..."}
         """
 
-        st.info("Mengirim foto ke Gemini...")
+        url = "https://api.groq.com/openai/v1/chat/completions"
 
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[prompt, img]
-        )
+        payload = {
+            "model": "qwen/qwen3.6-27b",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{img_b64}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "temperature": 0.1
+        }
 
-        text = response.text.strip()
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+
+        st.info("Mengirim foto ke Groq...")
+
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+
+        st.info("HTTP Status = " + str(response.status_code))
+
+        if response.status_code != 200:
+            st.error("Error: " + str(response.status_code))
+            st.error("Detail: " + response.text[:500])
+            return None
+
+        data = response.json()
+        text = data["choices"][0]["message"]["content"]
+        text = text.strip()
+
         if "```" in text:
             text = text.split("```")[1]
             if text.startswith("json"):
