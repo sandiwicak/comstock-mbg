@@ -10,6 +10,7 @@ from comstock_utils import (
 )
 from gsheet_helper import simpan_data, ambil_semua_data
 from gdrive_helper import upload_foto
+from ai_scorer import prediksi_skor_dari_foto
 
 
 st.set_page_config(
@@ -269,6 +270,44 @@ if st.session_state.halaman == "upload":
             st.session_state.skor_manual = {}
             st.session_state.skor_version = st.session_state.uploader_version
         
+        # Tombol proses AI
+        if st.button("🚀 Proses Semua Foto dengan AI"):
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            gagal_count = 0
+            
+            for idx, foto in enumerate(foto_list):
+                status_text.info(f"⏳ Menganalisa foto {idx+1}/{len(foto_list)}: {foto.name}")
+                
+                try:
+                    skor_ai = prediksi_skor_dari_foto(foto.getvalue())
+                    
+                    if skor_ai:
+                        st.session_state.skor_manual[f"nasi_{idx}"] = int(skor_ai.get("nasi", 0))
+                        st.session_state.skor_manual[f"sayur_{idx}"] = int(skor_ai.get("sayur", 0))
+                        st.session_state.skor_manual[f"lauk_{idx}"] = int(skor_ai.get("lauk", 0))
+                        st.session_state.skor_manual[f"ket_{idx}"] = skor_ai.get("alasan", "")
+                    else:
+                        gagal_count += 1
+                except Exception:
+                    gagal_count += 1
+                
+                progress_bar.progress((idx + 1) / len(foto_list))
+                
+                if idx < len(foto_list) - 1:
+                    time.sleep(1)
+            
+            if gagal_count > 0:
+                status_text.warning(f"⚠️ {gagal_count} foto gagal dianalisa AI (isi manual).")
+            else:
+                status_text.success(f"✅ AI selesai menganalisa semua {len(foto_list)} foto!")
+            
+            time.sleep(1)
+            st.rerun()
+        
+        st.markdown("---")
+        
         for i, foto in enumerate(foto_list):
             st.markdown(f"---")
             st.markdown(f"**Foto {i+1}: {foto.name}**")
@@ -299,7 +338,6 @@ if st.session_state.halaman == "upload":
                         key=f"lauk_{i}_{st.session_state.uploader_version}"
                     )
                 
-                # KETERANGAN
                 ket_val = st.text_input(
                     "Keterangan",
                     value=st.session_state.skor_manual.get(f"ket_{i}", ""),
