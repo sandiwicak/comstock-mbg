@@ -1,4 +1,4 @@
-"""AI Scorer - Gemini via REST API (paling reliable)."""
+"""AI Scorer - Gemini via Service Account."""
 import requests
 from PIL import Image
 from io import BytesIO
@@ -6,23 +6,42 @@ import base64
 import json
 import os
 import streamlit as st
+from oauth2client.service_account import ServiceAccountCredentials
+import google.auth.transport.requests
 
 
-def get_gemini_key():
-    """Ambil API key Gemini dari credentials.json."""
+def get_credentials_dict():
+    """Ambil credentials dari credentials.json."""
     if os.path.exists("credentials.json"):
         with open("credentials.json") as f:
-            config = json.load(f)
-            return config.get("gemini_api_key", "")
-    return ""
+            return json.load(f)
+    return None
+
+
+def get_access_token():
+    """Dapatkan access token dari Service Account."""
+    creds_dict = get_credentials_dict()
+    if not creds_dict:
+        return None
+    
+    scope = ["https://www.googleapis.com/auth/generative-language"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    
+    # Refresh untuk dapat access token
+    import google.auth.transport.requests
+    request = google.auth.transport.requests.Request()
+    creds.refresh(request)
+    
+    return creds.token
 
 
 def prediksi_skor_dari_foto(image_bytes):
     try:
-        api_key = get_gemini_key()
+        # Dapatkan access token dari service account
+        access_token = get_access_token()
         
-        if not api_key:
-            st.error("❌ GEMINI key tidak ada di credentials.json")
+        if not access_token:
+            st.error("❌ Gagal dapat access token dari service account")
             return None
         
         # Convert image ke base64
@@ -55,8 +74,8 @@ def prediksi_skor_dari_foto(image_bytes):
         }
         """
         
-        # REST API call langsung ke Gemini
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+        # REST API call dengan access token
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
         
         payload = {
             "contents": [{
@@ -72,22 +91,24 @@ def prediksi_skor_dari_foto(image_bytes):
             }]
         }
         
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
         
-        st.info("🔍 Debug: Mengirim foto ke Gemini (REST API)...")
+        st.info("🔍 Debug: Mengirim foto ke Gemini via Service Account...")
         
         response = requests.post(url, json=payload, headers=headers, timeout=30)
         
         st.info(f"🔍 Debug: HTTP Status = {response.status_code}")
         
         if response.status_code != 200:
-            st.error(f"❌ Error dari Google: {response.status_code}")
+            st.error(f"❌ Error: {response.status_code}")
             st.error(f"Detail: {response.text[:500]}")
             return None
         
         data = response.json()
         
-        # Extract text dari response
         text = data['candidates'][0]['content']['parts'][0]['text']
         text = text.strip()
         
@@ -98,7 +119,7 @@ def prediksi_skor_dari_foto(image_bytes):
         text = text.strip()
         
         result = json.loads(text)
-        st.success(f"✅ Berhasil! Saran AI: {result}")
+        st.success(f"✅ Saran AI: {result}")
         return result
         
     except Exception as e:
