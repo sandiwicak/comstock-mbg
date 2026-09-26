@@ -3,7 +3,6 @@ import requests
 import base64
 import json
 import os
-import streamlit as st
 
 
 def get_groq_key():
@@ -16,11 +15,11 @@ def get_groq_key():
 
 
 def prediksi_skor_dari_foto(image_bytes):
+    """Prediksi skor Comstock dari foto. Return dict atau None."""
     try:
         api_key = get_groq_key()
 
         if not api_key:
-            st.error("GROQ key tidak ada di credentials.json")
             return None
 
         img_b64 = base64.b64encode(image_bytes).decode("utf-8")
@@ -75,15 +74,9 @@ def prediksi_skor_dari_foto(image_bytes):
             "Authorization": "Bearer " + api_key
         }
 
-        st.info("Mengirim foto ke Groq...")
-
         response = requests.post(url, json=payload, headers=headers, timeout=30)
 
-        st.info("HTTP Status = " + str(response.status_code))
-
         if response.status_code != 200:
-            st.error("Error: " + str(response.status_code))
-            st.error("Detail: " + response.text[:500])
             return None
 
         data = response.json()
@@ -97,9 +90,7 @@ def prediksi_skor_dari_foto(image_bytes):
         text = text.strip()
 
         result = json.loads(text)
-        st.success("Saran AI: " + str(result))
         return result
 
-    except Exception as e:
-        st.error("Error: " + type(e).__name__ + ": " + str(e))
+    except Exception:
         return None
