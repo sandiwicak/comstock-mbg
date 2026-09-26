@@ -30,11 +30,8 @@ st.markdown("""
         color: #1a1a1a;
     }
     
-    .stApp { 
-        background: #f6e3b4 !important; 
-    }
+    .stApp { background: #f6e3b4 !important; }
     
-    /* HEADER */
     .main-header {
         background: linear-gradient(135deg, #efd48a 0%, #f6e3b4 100%);
         border: 2px solid #c99a3a;
@@ -47,7 +44,6 @@ st.markdown("""
     .main-header h1 { color: #1a1a1a !important; font-size: 1.8rem; font-weight: 800; margin: 0; }
     .main-header p { color: #1a1a1a !important; font-size: 0.85rem; margin: 0.5rem 0 0 0; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
     
-    /* CARD */
     .card { 
         background: #ffffff; 
         border: 2px solid #c99a3a; 
@@ -58,22 +54,16 @@ st.markdown("""
     }
     .section-title { color: #1a1a1a !important; font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 3px solid #c99a3a; display: inline-block; }
     
-    /* METRIC */
     .metric-card { background: linear-gradient(135deg, #c99a3a 0%, #8a5a2b 100%); border-radius: 14px; padding: 1.1rem; text-align: center; margin: 0.3rem 0; }
     .metric-value { font-size: 1.6rem; font-weight: 800; color: #ffffff !important; }
     .metric-label { font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; margin-top: 0.3rem; color: #ffffff !important; }
     .metric-card-red { background: linear-gradient(135deg, #c0392b 0%, #8a1a10 100%); border-radius: 14px; padding: 1.1rem; text-align: center; margin: 0.3rem 0; }
     
-    /* BUTTON */
     .stButton > button { background: #c99a3a !important; color: #ffffff !important; border: none !important; border-radius: 22px !important; padding: 0.8rem 1.5rem !important; font-weight: 600 !important; width: 100% !important; }
-    .stButton > button:hover { background: #8a5a2b !important; color: #ffffff !important; }
+    .stButton > button:hover { background: #8a5a2b !important; }
     .stButton > button p, .stButton > button span, .stButton > button div { color: #ffffff !important; }
     
-    /* TEXT INPUT - PUTIH */
-    .stTextInput input,
-    .stNumberInput input,
-    .stTextArea textarea,
-    .stDateInput input {
+    .stTextInput input, .stNumberInput input, .stTextArea textarea, .stDateInput input {
         background-color: #1a1a1a !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
@@ -81,65 +71,47 @@ st.markdown("""
         border: 2px solid #1a1a1a !important;
         border-radius: 10px !important;
     }
-    
-    .stTextInput input::placeholder,
-    .stNumberInput input::placeholder,
-    .stTextArea textarea::placeholder {
+    .stTextInput input::placeholder, .stNumberInput input::placeholder, .stTextArea textarea::placeholder {
         color: #888888 !important;
         -webkit-text-fill-color: #888888 !important;
     }
     
-    .stNumberInput button, .stNumberInput button:hover {
-        background-color: #1a1a1a !important;
-        color: #ffffff !important;
-        border: none !important;
-    }
+    .stNumberInput button { background-color: #1a1a1a !important; color: #ffffff !important; border: none !important; }
     .stNumberInput button svg { fill: #ffffff !important; }
     
-    /* SELECTBOX */
     .stSelectbox [data-baseweb="select"] > div,
     .stSelectbox [data-baseweb="select"] div,
-    .stSelectbox [data-baseweb="select"] span,
-    .stSelectbox div[role="button"],
-    .stSelectbox div[role="combobox"] {
+    .stSelectbox [data-baseweb="select"] span {
         background-color: #1a1a1a !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
         border-color: #1a1a1a !important;
     }
-    
-    .stSelectbox [data-baseweb="select"] svg,
-    .stSelectbox svg { fill: #ffffff !important; color: #ffffff !important; }
+    .stSelectbox svg { fill: #ffffff !important; }
     
     [data-baseweb="popover"], [data-baseweb="popover"] div, [role="listbox"] { background-color: #1a1a1a !important; }
     [role="option"], [role="option"] * { background-color: #1a1a1a !important; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
     [role="option"]:hover, [role="option"]:hover * { background-color: #c99a3a !important; color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important; }
     [aria-selected="true"], [aria-selected="true"] * { background-color: #c99a3a !important; color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important; }
     
-    /* LABELS - HITAM */
     .stTextInput label, .stNumberInput label, .stSelectbox label, .stTextArea label, .stFileUploader label, .stDateInput label, label {
         color: #1a1a1a !important;
         font-weight: 600 !important;
     }
     
-    /* CAPTION - HITAM */
-    .stCaption, [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] *, [data-testid="stCaptionContainer"] p, small {
+    .stCaption, [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] *, small {
         color: #1a1a1a !important;
         font-weight: 500 !important;
     }
     
-    /* MARKDOWN - HITAM */
     .stMarkdown, .stMarkdown *, .stMarkdown p, .stMarkdown li, .stMarkdown span { color: #1a1a1a !important; }
     
-    /* FILE UPLOADER */
     .stFileUploader > div > div, .stFileUploader section, [data-testid="stFileUploadDropzone"] {
         border: 2px dashed #c99a3a !important;
         border-radius: 12px !important;
         background: #f6e3b4 !important;
     }
-    
     .stFileUploader > div > div > div,
-    .stFileUploader > div > div > div > div,
     .stFileUploader > div > div small,
     .stFileUploader > div > div span,
     .stFileUploader > div > div p,
@@ -153,7 +125,6 @@ st.markdown("""
     }
     .stFileUploader button p, [data-testid="stFileUploadDropzone"] button * { color: #ffffff !important; }
     
-    /* NAMA FILE YANG DIUPLOAD - PUTIH */
     [data-testid="stFileUploaderFile"],
     [data-testid="stUploadedFile"],
     [data-testid="stFileUploaderFileName"],
@@ -165,21 +136,15 @@ st.markdown("""
         -webkit-text-fill-color: #ffffff !important;
     }
     
-    [data-testid="stFileUploaderDeleteBtn"] svg,
-    [data-testid="stFileUploaderDeleteBtn"] *,
-    button[title="Remove file"] svg {
+    [data-testid="stFileUploaderDeleteBtn"] svg, [data-testid="stFileUploaderDeleteBtn"] *, button[title="Remove file"] svg {
         fill: #ffffff !important;
         color: #ffffff !important;
     }
     
-    /* ALERT */
-    .stAlert, .stAlert *, .stAlert p, [data-testid="stAlert"], [data-testid="stAlert"] * {
-        color: #1a1a1a !important;
-    }
+    .stAlert, .stAlert *, .stAlert p, [data-testid="stAlert"], [data-testid="stAlert"] * { color: #1a1a1a !important; }
     .stAlert { border-radius: 12px !important; }
     
-    /* EXPANDER */
-    [data-testid="stExpander"], [data-testid="stExpander"] details, [data-testid="stExpander"] summary {
+    [data-testid="stExpander"] {
         background: #ffffff !important;
         border: 2px solid #c99a3a !important;
         border-radius: 12px !important;
@@ -193,27 +158,19 @@ st.markdown("""
     [data-testid="stExpander"] svg { color: #1a1a1a !important; fill: #1a1a1a !important; }
     [data-testid="stExpander"] summary { font-weight: 700 !important; }
     
-    /* SIDEBAR */
     section[data-testid="stSidebar"] { background: #efd48a !important; border-right: 2px solid #c99a3a; }
     section[data-testid="stSidebar"] * { color: #1a1a1a !important; }
     section[data-testid="stSidebar"] .stButton > button { background: #ffffff !important; color: #1a1a1a !important; border: 2px solid #8a5a2b !important; border-radius: 12px; margin-bottom: 0.5rem; }
-    section[data-testid="stSidebar"] .stButton > button p,
-    section[data-testid="stSidebar"] .stButton > button * { color: #1a1a1a !important; }
+    section[data-testid="stSidebar"] .stButton > button p { color: #1a1a1a !important; }
     section[data-testid="stSidebar"] .stButton > button:hover { background: #8a5a2b !important; }
-    section[data-testid="stSidebar"] .stButton > button:hover p,
-    section[data-testid="stSidebar"] .stButton > button:hover * { color: #ffffff !important; }
+    section[data-testid="stSidebar"] .stButton > button:hover p { color: #ffffff !important; }
     
-    /* PROGRESS */
     .stProgress > div > div > div > div { background: #c99a3a !important; }
     
-    /* METRIC NATIVE */
     [data-testid="stMetricValue"] { color: #1a1a1a !important; font-weight: 800 !important; }
     [data-testid="stMetricLabel"] { color: #1a1a1a !important; font-weight: 600 !important; }
     
-    /* DATAFRAME */
     .stDataFrame, .stDataFrame * { color: #1a1a1a; }
-    
-    /* SPINNER */
     .stSpinner > div, .stSpinner > div * { color: #1a1a1a !important; }
     
     #MainMenu, footer, header {visibility: hidden;}
@@ -225,9 +182,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Session state
+# ============ SESSION STATE ============
 if "halaman" not in st.session_state: st.session_state.halaman = "upload"
 if "user" not in st.session_state: st.session_state.user = None
+if "uploader_version" not in st.session_state: st.session_state.uploader_version = 0
 
 # Cek login
 user = cek_login()
@@ -281,11 +239,13 @@ if st.session_state.halaman == "upload":
     st.markdown("**📷 Upload Foto Sisa (bisa banyak sekaligus)**")
     st.caption("Tips: Klik 'Browse files', lalu Ctrl + Klik beberapa foto, atau drag & drop.")
     
+    uploader_key = f"upload_fotos_v{st.session_state.uploader_version}"
+    
     foto_list = st.file_uploader(
         "Pilih foto sisa makanan",
         type=["jpg", "jpeg", "png"],
         accept_multiple_files=True,
-        key="upload_fotos",
+        key=uploader_key,
         label_visibility="collapsed"
     )
     
@@ -298,7 +258,7 @@ if st.session_state.halaman == "upload":
                 st.image(f, caption=f.name[:12], use_container_width=True)
         
         st.markdown("---")
-        st.info(f"⏱️ Estimasi waktu proses: ~{len(foto_list) * 15} detik. Jangan tutup browser.")
+        st.info(f"⏱️ Estimasi waktu proses: ~{len(foto_list) * 30} detik (retry agresif). Jangan tutup browser.")
         
         if st.button("🚀 Proses Semua Foto dengan AI"):
             progress_bar = st.progress(0)
@@ -341,9 +301,8 @@ if st.session_state.halaman == "upload":
                 
                 progress_bar.progress((idx + 1) / len(foto_list))
                 
-                # Jeda antar foto biar tidak kena rate limit
                 if idx < len(foto_list) - 1:
-                    time.sleep(2)
+                    time.sleep(3)
             
             if gagal_count > 0:
                 status_text.warning(f"⚠️ Selesai. {gagal_count} foto gagal dianalisa AI (isi manual).")
@@ -445,13 +404,19 @@ if st.session_state.halaman == "upload":
                 status_text.success(f"✅ Selesai! {sukses} sukses, {gagal} gagal.")
                 
                 del st.session_state["hasil_upload"]
+                st.session_state.uploader_version += 1
                 
-                if st.button("🔄 Upload Lagi"):
-                    st.rerun()
+                time.sleep(2)
+                st.rerun()
         
         with col2:
             if st.button("🗑️ Batal"):
-                del st.session_state["hasil_upload"]
+                if "hasil_upload" in st.session_state:
+                    del st.session_state["hasil_upload"]
+                
+                st.session_state.uploader_version += 1
+                
+                time.sleep(1)
                 st.rerun()
     
     st.markdown('</div>', unsafe_allow_html=True)
