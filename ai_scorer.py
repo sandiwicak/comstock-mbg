@@ -1,4 +1,4 @@
-"""AI Scorer - Groq Vision API."""
+"""AI Scorer - Groq Vision API (dengan debug)."""
 import requests
 import base64
 import json
@@ -20,7 +20,11 @@ def prediksi_skor_dari_foto(image_bytes):
     try:
         api_key = get_groq_key()
 
+        # DEBUG: cek panjang key
+        st.info(f"🔍 Debug: API key panjang = {len(api_key)} karakter")
+
         if not api_key:
+            st.error("❌ Debug: API key kosong")
             return None
 
         img_b64 = base64.b64encode(image_bytes).decode("utf-8")
@@ -51,7 +55,7 @@ def prediksi_skor_dari_foto(image_bytes):
         url = "https://api.groq.com/openai/v1/chat/completions"
 
         payload = {
-            "model": ""model": "meta-llama/llama-4-scout-17b-16e-instruct",
+            "model": "qwen/qwen3.8-27b",
             "messages": [
                 {
                     "role": "user",
@@ -75,9 +79,30 @@ def prediksi_skor_dari_foto(image_bytes):
             "Authorization": "Bearer " + api_key
         }
 
+        st.info("🔍 Debug: Mengirim request ke Groq...")
+
         response = requests.post(url, json=payload, headers=headers, timeout=30)
 
+        st.info(f"🔍 Debug: HTTP Status = {response.status_code}")
+
+        if response.status_code == 401:
+            st.error("❌ Debug: API key SALAH (401 Unauthorized)")
+            st.error(f"Detail: {response.text[:300]}")
+            return None
+
+        if response.status_code == 429:
+            st.warning("⚠️ Debug: QUOTA HABIS (429 Rate Limit)")
+            st.warning(f"Detail: {response.text[:300]}")
+            return None
+
+        if response.status_code == 404:
+            st.error("❌ Debug: Model TIDAK DITEMUKAN (404)")
+            st.error(f"Detail: {response.text[:300]}")
+            return None
+
         if response.status_code != 200:
+            st.error(f"❌ Debug: Error {response.status_code}")
+            st.error(f"Detail: {response.text[:500]}")
             return None
 
         data = response.json()
@@ -90,8 +115,10 @@ def prediksi_skor_dari_foto(image_bytes):
                 text = text[4:]
         text = text.strip()
 
+        st.success(f"✅ Debug: Response OK")
         result = json.loads(text)
         return result
 
-    except Exception:
+    except Exception as e:
+        st.error(f"❌ Debug Exception: {type(e).__name__}: {e}")
         return None
