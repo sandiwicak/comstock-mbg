@@ -1,4 +1,4 @@
-"""AI Scorer - Gemini via Service Account."""
+"""AI Scorer - Gemini via Service Account (pakai google-auth)."""
 import requests
 from PIL import Image
 from io import BytesIO
@@ -6,7 +6,8 @@ import base64
 import json
 import os
 import streamlit as st
-from oauth2client.service_account import ServiceAccountCredentials
+
+from google.oauth2 import service_account
 import google.auth.transport.requests
 
 
@@ -19,32 +20,38 @@ def get_credentials_dict():
 
 
 def get_access_token():
-    """Dapatkan access token dari Service Account."""
+    """Dapatkan access token dari Service Account pakai google-auth."""
     creds_dict = get_credentials_dict()
     if not creds_dict:
+        st.error("❌ credentials.json tidak ditemukan")
         return None
     
-    scope = ["https://www.googleapis.com/auth/generative-language"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    try:
+        scope = ["https://www.googleapis.com/auth/generative-language"]
+        
+        creds = service_account.Credentials.from_service_account_info(
+            creds_dict, 
+            scopes=scope
+        )
+        
+        # Refresh untuk dapat access token
+        auth_req = google.auth.transport.requests.Request()
+        creds.refresh(auth_req)
+        
+        return creds.token
     
-    # Refresh untuk dapat access token
-    import google.auth.transport.requests
-    request = google.auth.transport.requests.Request()
-    creds.refresh(request)
-    
-    return creds.token
+    except Exception as e:
+        st.error(f"❌ Gagal refresh token: {e}")
+        return None
 
 
 def prediksi_skor_dari_foto(image_bytes):
     try:
-        # Dapatkan access token dari service account
         access_token = get_access_token()
         
         if not access_token:
-            st.error("❌ Gagal dapat access token dari service account")
             return None
         
-        # Convert image ke base64
         img_b64 = base64.b64encode(image_bytes).decode('utf-8')
         
         prompt = """
@@ -74,7 +81,6 @@ def prediksi_skor_dari_foto(image_bytes):
         }
         """
         
-        # REST API call dengan access token
         url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
         
         payload = {
@@ -96,7 +102,7 @@ def prediksi_skor_dari_foto(image_bytes):
             "Authorization": f"Bearer {access_token}"
         }
         
-        st.info("🔍 Debug: Mengirim foto ke Gemini via Service Account...")
+        st.info("🔍 Debug: Mengirim foto ke Gemini...")
         
         response = requests.post(url, json=payload, headers=headers, timeout=30)
         
