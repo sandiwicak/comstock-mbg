@@ -1,4 +1,4 @@
-"""AI Scorer - Groq Vision API dengan retry super agresif."""
+"""AI Scorer - OpenRouter Vision API."""
 import requests
 import base64
 import json
@@ -8,17 +8,15 @@ from PIL import Image
 from io import BytesIO
 
 
-def get_groq_key():
-    """Ambil API key Groq dari config.json."""
+def get_openrouter_key():
     if os.path.exists("config.json"):
         with open("config.json") as f:
             config = json.load(f)
-            return config.get("groq_api_key", "")
+            return config.get("openrouter_api_key", "")
     return ""
 
 
-def compress_image(image_bytes, max_size=800, quality=80):
-    """Compress gambar lebih agresif biar cepat diproses."""
+def compress_image(image_bytes, max_size=640, quality=70):
     try:
         img = Image.open(BytesIO(image_bytes))
         if img.mode in ("RGBA", "P"):
@@ -35,11 +33,9 @@ def compress_image(image_bytes, max_size=800, quality=80):
 
 
 def prediksi_skor_dari_foto(image_bytes):
-    """Prediksi skor Comstock dengan 7 model, 10x retry."""
     try:
-        api_key = get_groq_key()
+        api_key = get_openrouter_key()
         if not api_key:
-            print("[AI] API key kosong")
             return None
 
         image_bytes = compress_image(image_bytes)
@@ -54,105 +50,63 @@ def prediksi_skor_dari_foto(image_bytes):
         Jawab HANYA JSON: {"nasi": 0, "sayur": 0, "lauk": 0, "confidence": 0.0, "alasan": "..."}
         """
 
-        url = "https://api.groq.com/openai/v1/chat/completions"
+        url = "https://openrouter.ai/api/v1/chat/completions"
 
-        # 7 MODEL FALLBACK
+        # Model gratis yang bisa lihat gambar
         models = [
-            "meta-llama/llama-4-scout-17b-16e-instruct",
-            "meta-llama/llama-4-maverick-17b-128e-instruct",
-            "qwen/qwen3.8-27b",
-            "qwen/qwen2.5-vl-72b-instruct",
-            "qwen/qwen2.5-vl-32b-instruct",
-            "llava-v1.5-7b-4096-preview",
-            "gemma2-9b-it"
+            "nvidia/nemotron-nano-12b-v2-vl:free",
+            "qwen/qwen2.5-vl-72b-instruct:free",
+            "meta-llama/llama-4-scout-17b-16e-instruct:free"
         ]
 
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + api_key
+            "Authorization": "Bearer " + api_key,
+            "HTTP-Referer": "https://comstock-mbg.streamlit.app",
+            "X-Title": "Comstock Digital MBG"
         }
 
-        # 10x RETRY, tiap kali coba semua 7 model
-        for attempt in range(10):
+        for attempt in range(3):
             for model in models:
                 try:
                     payload = {
                         "model": model,
-                        "messages": [
-                            {
-                                "role": "user",
-                                "content": [
-                                    {"type": "text", "text": prompt},
-                                    {
-                                        "type": "image_url",
-                                        "image_url": {
-                                            "url": "data:image/jpeg;base64," + img_b64
-                                        }
-                                    }
-                                ]
-                            }
-                        ],
+                        "messages": [{
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": prompt},
+                                {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + img_b64}}
+                            ]
+                        }],
                         "temperature": 0.1,
-                        "max_tokens": 500
+                        "max_tokens": 400
                     }
 
-                    print(f"[AI] Attempt {attempt+1}, model: {model}")
-                    response = requests.post(url, json=payload, headers=headers, timeout=90)
+                    response = requests.post(url, json=payload, headers=headers, timeout=30)
 
                     if response.status_code == 200:
                         data = response.json()
-                        text = data["choices"][0]["message"]["content"]
-                        text = text.strip()
-
+                        text = data["choices"][0]["message"]["content"].strip()
                         if "```" in text:
                             text = text.split("```")[1]
                             if text.startswith("json"):
                                 text = text[4:]
                         text = text.strip()
-
-                        result = json.loads(text)
-                        print(f"[AI] SUKSES dengan {model}")
-                        return result
+                        return json.loads(text)
 
                     elif response.status_code == 429:
-                        print(f"[AI] Rate limit 429, tunggu 8 detik...")
-                        time.sleep(8)
-                        continue
-
-                    elif response.status_code == 404:
-                        # Model tidak ada, langsung coba model berikutnya
-                        print(f"[AI] Model {model} tidak ada (404)")
-                        continue
-
-                    elif response.status_code >= 500:
-                        print(f"[AI] Server error {response.status_code}, tunggu 5 detik...")
                         time.sleep(5)
                         continue
 
                     else:
-                        print(f"[AI] Error {response.status_code}: {response.text[:200]}")
-                        time.sleep(3)
                         continue
 
-                except requests.exceptions.Timeout:
-                    print(f"[AI] Timeout dengan {model}")
-                    time.sleep(3)
-                    continue
-                except json.JSONDecodeError as e:
-                    print(f"[AI] JSON error: {e}")
-                    time.sleep(2)
-                    continue
-                except Exception as e:
-                    print(f"[AI] Error: {e}")
+                except Exception:
                     continue
 
-            # Jeda antar attempt besar
-            print(f"[AI] Attempt {attempt+1} selesai, jeda 5 detik...")
-            time.sleep(5)
+            time.sleep(3)
 
-        print("[AI] SEMUA ATTEMPT GAGAL")
         return None
 
-    except Exception as e:
-        print(f"[AI] Exception utama: {e}")
+    except Exception:
         return None
