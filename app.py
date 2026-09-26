@@ -135,6 +135,7 @@ if "halaman" not in st.session_state: st.session_state.halaman = "upload"
 if "kode_sekolah" not in st.session_state: st.session_state.kode_sekolah = "SDN01-LB"
 if "nama_enum" not in st.session_state: st.session_state.nama_enum = "Enumerator"
 if "ai_version" not in st.session_state: st.session_state.ai_version = 0
+if "uploader_version" not in st.session_state: st.session_state.uploader_version = 0
 
 user = {
     "nama": st.session_state.nama_enum,
@@ -176,12 +177,12 @@ if st.session_state.halaman == "upload":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📸 Upload Foto Sisa</div>', unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         tanggal_upload = st.date_input("Tanggal", datetime.now(), key="upload_tanggal")
-        jumlah_siswa = st.number_input("Jumlah Foto Hari Ini", 1, 200, 70, key="upload_jumlah")
     with col2:
         harga_upload = st.number_input("Harga Porsi (Rp)", 0.0, 100000.0, 15000.0, key="upload_harga")
+    with col3:
         hari_ke = st.number_input("Hari Ke-", 1, 30, 1, key="upload_hari")
     
     with st.expander("⚖️ Berat Awal Referensi (klik untuk ubah)"):
@@ -193,11 +194,13 @@ if st.session_state.halaman == "upload":
     st.markdown("---")
     st.markdown("**📷 Upload Foto Sisa (bisa banyak sekaligus)**")
     
+    uploader_key = f"upload_fotos_v{st.session_state.uploader_version}"
+    
     foto_list = st.file_uploader(
         "Pilih foto sisa makanan",
         type=["jpg", "jpeg", "png"],
         accept_multiple_files=True,
-        key="upload_fotos",
+        key=uploader_key,
         label_visibility="collapsed"
     )
     
@@ -303,6 +306,7 @@ if st.session_state.halaman == "upload":
                 
                 sukses = 0
                 gagal = 0
+                error_detail = []
                 
                 for i, foto in enumerate(foto_list):
                     status_text.info(f"⏳ Menyimpan {i+1}/{len(foto_list)}: {foto.name}")
@@ -357,21 +361,31 @@ if st.session_state.halaman == "upload":
                         sukses += 1
                     except Exception as e:
                         gagal += 1
+                        error_detail.append(f"Foto {i+1} ({foto.name}): {type(e).__name__}: {str(e)[:100]}")
                     
                     progress_bar.progress((i + 1) / len(foto_list))
                 
                 status_text.success(f"✅ Selesai! {sukses} sukses, {gagal} gagal.")
                 
-                st.session_state.skor_manual = {}
-                st.session_state.ai_version = 0
+                # Tampilkan error detail kalau ada
+                if error_detail:
+                    with st.expander(f"❌ Detail Error ({len(error_detail)})", expanded=True):
+                        for err in error_detail:
+                            st.error(err)
                 
-                time.sleep(2)
-                st.rerun()
+                # Kalau sukses, CLEAR semua
+                if gagal == 0:
+                    st.session_state.skor_manual = {}
+                    st.session_state.ai_version = 0
+                    st.session_state.uploader_version += 1
+                    time.sleep(2)
+                    st.rerun()
         
         with col2:
             if st.button("🗑️ Batal"):
                 st.session_state.skor_manual = {}
                 st.session_state.ai_version = 0
+                st.session_state.uploader_version += 1
                 time.sleep(1)
                 st.rerun()
     
