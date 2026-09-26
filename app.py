@@ -1,4 +1,4 @@
-"""Comstock Digital MBG - Upload + AI + Simpan Sekali Klik."""
+"""Comstock Digital MBG - Auto Upload + AI + Simpan."""
 import streamlit as st
 import pandas as pd
 import time
@@ -135,6 +135,7 @@ if "halaman" not in st.session_state: st.session_state.halaman = "upload"
 if "kode_sekolah" not in st.session_state: st.session_state.kode_sekolah = "SDN01-LB"
 if "nama_enum" not in st.session_state: st.session_state.nama_enum = "Enumerator"
 if "uploader_version" not in st.session_state: st.session_state.uploader_version = 0
+if "processed_files" not in st.session_state: st.session_state.processed_files = set()
 
 user = {
     "nama": st.session_state.nama_enum,
@@ -181,6 +182,7 @@ st.markdown(f"""
 if st.session_state.halaman == "upload":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📸 Upload Foto Sisa</div>', unsafe_allow_html=True)
+    st.caption("Upload foto → langsung diproses AI + disimpan otomatis.")
     
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -198,7 +200,6 @@ if st.session_state.halaman == "upload":
     
     st.markdown("---")
     st.markdown("**📷 Upload Foto Sisa (bisa banyak sekaligus)**")
-    st.caption("Upload foto → klik tombol di bawah → AI analisa + simpan + clear otomatis.")
     
     uploader_key = f"file_uploader_v{st.session_state.uploader_version}"
     
@@ -210,12 +211,14 @@ if st.session_state.halaman == "upload":
         label_visibility="collapsed"
     )
     
+    # Kalau ada foto baru (belum diproses), langsung proses
     if foto_list:
-        st.success(f"✅ {len(foto_list)} foto terpilih")
+        # Filter foto yang belum diproses
+        foto_baru = [f for f in foto_list if f.name not in st.session_state.processed_files]
         
-        st.markdown("---")
-        
-        if st.button("🚀 Proses AI + Simpan Semua", key="btn_proses"):
+        if foto_baru:
+            st.info(f"🔄 Memproses {len(foto_baru)} foto baru...")
+            
             progress_bar = st.progress(0)
             status_text = st.empty()
             
@@ -224,8 +227,8 @@ if st.session_state.halaman == "upload":
             error_detail = []
             gagal_ai = 0
             
-            for i, foto in enumerate(foto_list):
-                status_text.info(f"⏳ Memproses {i+1}/{len(foto_list)}: {foto.name}")
+            for i, foto in enumerate(foto_baru):
+                status_text.info(f"⏳ Memproses {i+1}/{len(foto_baru)}: {foto.name}")
                 
                 nasi_val = 0
                 sayur_val = 0
@@ -245,7 +248,7 @@ if st.session_state.halaman == "upload":
                     gagal_ai += 1
                 
                 try:
-                    filename = f"{user['kode_sekolah']}_{tanggal_upload}_{i+1:03d}_{foto.name}"
+                    filename = f"{user['kode_sekolah']}_{tanggal_upload}_{foto.name}"
                     link_foto = upload_foto(
                         foto.getvalue(),
                         filename,
@@ -270,7 +273,7 @@ if st.session_state.halaman == "upload":
                         "Nama Sekolah": SEKOLAH_LIST[user['kode_sekolah']],
                         "Nama Enumerator": user['nama'],
                         "Email Enumerator": user.get('email', '-'),
-                        "ID Siswa": str(i + 1),
+                        "ID Siswa": str(len(st.session_state.processed_files) + i + 1),
                         "Kelas": "-",
                         "Skor Visual Nasi": nasi_val, "Berat Awal Nasi (g)": ba_nasi,
                         "Berat Sisa Nasi (g)": round(bsn,1), "% Sisa Nasi": round(pn,4),
@@ -287,13 +290,14 @@ if st.session_state.halaman == "upload":
                     }
                     simpan_data(row)
                     sukses += 1
+                    st.session_state.processed_files.add(foto.name)
                 except Exception as e:
                     gagal += 1
                     error_detail.append(f"Foto {i+1} ({foto.name}): {type(e).__name__}: {str(e)[:100]}")
                 
-                progress_bar.progress((i + 1) / len(foto_list))
+                progress_bar.progress((i + 1) / len(foto_baru))
                 
-                if i < len(foto_list) - 1:
+                if i < len(foto_baru) - 1:
                     time.sleep(1)
             
             status_text.success(f"✅ Selesai! {sukses} sukses, {gagal} gagal, {gagal_ai} AI tidak tersedia")
@@ -303,8 +307,10 @@ if st.session_state.halaman == "upload":
                     for err in error_detail:
                         st.error(err)
             
-            if gagal == 0:
+            # Kalau semua sukses, clear dan reset uploader
+            if gagal == 0 and gagal_ai == 0:
                 st.session_state.uploader_version += 1
+                st.session_state.processed_files = set()
                 time.sleep(2)
                 st.rerun()
     
