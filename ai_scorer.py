@@ -1,5 +1,6 @@
-"""AI Scorer - Gemini Vision."""
-import google.generativeai as genai
+"""AI Scorer - Gemini Vision (pakai google-genai library baru)."""
+from google import genai
+from google.genai import types
 from PIL import Image
 from io import BytesIO
 import json
@@ -23,8 +24,8 @@ def prediksi_skor_dari_foto(image_bytes):
             print("GEMINI key tidak ada di credentials.json")
             return None
         
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        # Pakai library baru google-genai
+        client = genai.Client(api_key=api_key)
         
         img = Image.open(BytesIO(image_bytes))
         
@@ -55,7 +56,11 @@ def prediksi_skor_dari_foto(image_bytes):
         }
         """
         
-        response = model.generate_content([prompt, img])
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=[prompt, img]
+        )
+        
         text = response.text.strip()
         
         if "```" in text:
