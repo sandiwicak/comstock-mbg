@@ -19,12 +19,7 @@ HEADERS = [
 
 
 def get_credentials_dict():
-    """Baca credentials dari config.json."""
-    if os.path.exists("config.json"):
-        with open("config.json") as f:
-            return json.load(f)
-    
-    # Fallback ke credentials.json (untuk lokal)
+    """Baca credentials dari credentials.json."""
     if os.path.exists("credentials.json"):
         with open("credentials.json") as f:
             return json.load(f)
@@ -40,7 +35,7 @@ def get_client():
     
     creds_dict = get_credentials_dict()
     if creds_dict is None:
-        raise Exception("config.json tidak ditemukan di repo.")
+        raise Exception("credentials.json tidak ditemukan di repo.")
     
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     return gspread.authorize(creds)
