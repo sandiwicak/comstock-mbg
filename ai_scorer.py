@@ -2,16 +2,15 @@
 import requests
 import base64
 import json
-import os
+import streamlit as st
 
 
 def get_groq_key():
-    """Ambil API key Groq dari credentials.json."""
-    if os.path.exists("credentials.json"):
-        with open("credentials.json") as f:
-            config = json.load(f)
-            return config.get("groq_api_key", "")
-    return ""
+    """Ambil API key Groq dari Streamlit Secrets."""
+    try:
+        return st.secrets.get("groq_api_key", "")
+    except Exception:
+        return ""
 
 
 def prediksi_skor_dari_foto(image_bytes):
