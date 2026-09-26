@@ -1,6 +1,5 @@
 """AI Scorer - Gemini 2.0 Flash via REST API."""
 import requests
-from io import BytesIO
 import base64
 import json
 import os
@@ -47,11 +46,11 @@ def prediksi_skor_dari_foto(image_bytes):
 
         Jawab HANYA dalam format JSON:
         {
-            "nasi": <skor 0-5>,
-            "sayur": <skor 0-5>,
-            "lauk": <skor 0-5>,
-            "confidence": <0.0-1.0>,
-            "alasan": "<penjelasan>"
+            "nasi": 0,
+            "sayur": 0,
+            "lauk": 0,
+            "confidence": 0.0,
+            "alasan": "penjelasan"
         }
         """
 
@@ -82,11 +81,11 @@ def prediksi_skor_dari_foto(image_bytes):
 
         response = requests.post(url, json=payload, headers=headers, timeout=30)
 
-        st.info(f"HTTP Status = {response.status_code}")
+        st.info("HTTP Status = " + str(response.status_code))
 
         if response.status_code != 200:
-            st.error(f"Error dari Google: {response.status_code}")
-            st.error(f"Detail: {response.text[:500]}")
+            st.error("Error dari Google: " + str(response.status_code))
+            st.error("Detail: " + response.text[:500])
             return None
 
         data = response.json()
@@ -101,9 +100,9 @@ def prediksi_skor_dari_foto(image_bytes):
         text = text.strip()
 
         result = json.loads(text)
-        st.success(f"Saran AI: {result}")
+        st.success("Saran AI: " + str(result))
         return result
 
     except Exception as e:
-        st.error(f"Error: {type(e).__name__}: {e}")
+        st.error("Error: " + type(e).__name__ + ": " + str(e))
         return None
