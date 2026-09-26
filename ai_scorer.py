@@ -1,4 +1,4 @@
-"""AI Scorer - Groq Vision API."""
+"""AI Scorer - Groq Vision API dengan auto-retry."""
 import requests
 import base64
 import json
@@ -33,6 +33,7 @@ def compress_image(image_bytes, max_size=640, quality=70):
 
 
 def prediksi_skor_dari_foto(image_bytes):
+    """Coba 5x dengan 3 model berbeda. Return dict atau None."""
     try:
         api_key = get_groq_key()
         if not api_key:
@@ -62,7 +63,8 @@ def prediksi_skor_dari_foto(image_bytes):
             "Authorization": "Bearer " + api_key
         }
 
-        for attempt in range(3):
+        # RETRY 5x dengan 3 model
+        for attempt in range(5):
             for model in models:
                 try:
                     payload = {
@@ -88,20 +90,37 @@ def prediksi_skor_dari_foto(image_bytes):
                             if text.startswith("json"):
                                 text = text[4:]
                         text = text.strip()
-                        return json.loads(text)
+                        result = json.loads(text)
+                        print(f"[AI] ✅ Sukses dengan {model} (attempt {attempt+1})")
+                        return result
 
                     elif response.status_code == 429:
-                        time.sleep(5)
+                        # Rate limit, tunggu lebih lama
+                        time.sleep(8)
+                        continue
+
+                    elif response.status_code == 404:
+                        # Model tidak ada, langsung coba model berikutnya
                         continue
 
                     else:
+                        # Error lain, tunggu sebentar
+                        time.sleep(3)
                         continue
 
+                except requests.exceptions.Timeout:
+                    time.sleep(3)
+                    continue
+                except json.JSONDecodeError:
+                    time.sleep(2)
+                    continue
                 except Exception:
                     continue
 
+            # Jeda antar attempt
             time.sleep(3)
 
+        print("[AI] ❌ Gagal semua attempt")
         return None
 
     except Exception:
