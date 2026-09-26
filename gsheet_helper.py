@@ -1,8 +1,9 @@
-"""Koneksi & operasi Google Sheets."""
+"""Koneksi & operasi Google Sheets - baca dari Streamlit Secrets."""
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import os
+import streamlit as st
 import json
+import base64
 
 SHEET_NAME = "Data_Comstock_MBG"
 WORKSHEET_NAME = "Data"
@@ -19,11 +20,31 @@ HEADERS = [
 
 
 def get_credentials_dict():
-    """Baca credentials dari credentials.json."""
-    if os.path.exists("credentials.json"):
-        with open("credentials.json") as f:
-            return json.load(f)
-    
+    """Ambil credentials dari Streamlit Secrets."""
+    try:
+        if "gcp_service_account" in st.secrets:
+            creds_dict = dict(st.secrets["gcp_service_account"])
+
+            # Kalau private_key disimpan dalam beberapa bagian (PK1, PK2, ...)
+            if "PK1" in creds_dict:
+                pk = ""
+                i = 1
+                while f"PK{i}" in creds_dict:
+                    pk += creds_dict.pop(f"PK{i}")
+                    i += 1
+                creds_dict["private_key"] = pk
+
+            # Kalau private_key di-encode base64
+            if "private_key_b64" in creds_dict:
+                creds_dict["private_key"] = base64.b64decode(
+                    creds_dict["private_key_b64"]
+                ).decode("utf-8")
+                del creds_dict["private_key_b64"]
+
+            return creds_dict
+    except Exception as e:
+        st.error(f"Gagal baca Secrets: {e}")
+
     return None
 
 
@@ -32,11 +53,11 @@ def get_client():
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive"
     ]
-    
+
     creds_dict = get_credentials_dict()
     if creds_dict is None:
-        raise Exception("credentials.json tidak ditemukan di repo.")
-    
+        raise Exception("Credentials tidak ditemukan di Streamlit Secrets.")
+
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     return gspread.authorize(creds)
 
