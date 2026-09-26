@@ -6,9 +6,11 @@ import streamlit as st
 
 
 def get_groq_key():
-    """Ambil API key Groq dari Streamlit Secrets."""
+    """Ambil API key Groq dari Streamlit Secrets (digabung dari 2 bagian)."""
     try:
-        return st.secrets.get("groq_api_key", "")
+        p1 = st.secrets.get("groq_p1", "")
+        p2 = st.secrets.get("groq_p2", "")
+        return p1 + p2
     except Exception:
         return ""
 
