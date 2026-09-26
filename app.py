@@ -252,7 +252,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Session state
-if "halaman" not in st.session_state: st.session_state.halaman = "bulk"
+if "halaman" not in st.session_state: st.session_state.halaman = "upload"
 if "user" not in st.session_state: st.session_state.user = None
 
 # Cek login
@@ -272,7 +272,7 @@ with st.sidebar:
     st.markdown(f"### 👋 Halo, {user['nama']}")
     st.caption(f"🏫 {SEKOLAH_LIST.get(user['kode_sekolah'], user['kode_sekolah'])}")
     st.markdown("---")
-    if st.button("📸 Upload Bulk"): st.session_state.halaman = "bulk"; st.rerun()
+    if st.button("📸 Upload Foto"): st.session_state.halaman = "upload"; st.rerun()
     if st.button("📊 Dashboard"): st.session_state.halaman = "dashboard"; st.rerun()
     st.markdown("---")
     if st.button("🚪 Logout"): logout()
@@ -285,25 +285,25 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ==================== HALAMAN BULK UPLOAD ====================
-if st.session_state.halaman == "bulk":
+# ==================== HALAMAN UPLOAD ====================
+if st.session_state.halaman == "upload":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">📸 Upload Bulk Foto</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">📸 Upload Foto</div>', unsafe_allow_html=True)
     st.caption("Upload banyak foto sekaligus. AI akan menganalisa otomatis. Tinggal koreksi dan simpan.")
     
     # Setup minimal
     col1, col2 = st.columns(2)
     with col1:
-        tanggal_bulk = st.date_input("Tanggal", datetime.now(), key="bulk_tanggal")
+        tanggal_upload = st.date_input("Tanggal", datetime.now(), key="upload_tanggal")
     with col2:
-        bulk_harga = st.number_input("Harga Porsi (Rp)", 0.0, 100000.0, 15000.0, key="bulk_harga")
+        harga_upload = st.number_input("Harga Porsi (Rp)", 0.0, 100000.0, 15000.0, key="upload_harga")
     
     # Berat awal default
     with st.expander("⚖️ Berat Awal Referensi (klik untuk ubah)"):
         col1, col2, col3 = st.columns(3)
-        with col1: bulk_ba_nasi = st.number_input("Nasi (g)", 0.0, 500.0, 136.0, key="bulk_ba_nasi")
-        with col2: bulk_ba_sayur = st.number_input("Sayur (g)", 0.0, 500.0, 29.0, key="bulk_ba_sayur")
-        with col3: bulk_ba_lauk = st.number_input("Lauk (g)", 0.0, 500.0, 64.0, key="bulk_ba_lauk")
+        with col1: ba_nasi = st.number_input("Nasi (g)", 0.0, 500.0, 136.0, key="ba_nasi")
+        with col2: ba_sayur = st.number_input("Sayur (g)", 0.0, 500.0, 29.0, key="ba_sayur")
+        with col3: ba_lauk = st.number_input("Lauk (g)", 0.0, 500.0, 64.0, key="ba_lauk")
     
     st.markdown("---")
     st.markdown("**📷 Upload Foto (bisa banyak sekaligus)**")
@@ -313,7 +313,7 @@ if st.session_state.halaman == "bulk":
         "Pilih foto sisa makanan",
         type=["jpg", "jpeg", "png"],
         accept_multiple_files=True,
-        key="bulk_fotos",
+        key="upload_fotos",
         label_visibility="collapsed"
     )
     
@@ -374,12 +374,12 @@ if st.session_state.halaman == "bulk":
                 progress_bar.progress((idx + 1) / len(foto_list))
             
             status_text.success(f"✅ Analisa selesai! Silakan koreksi di bawah.")
-            st.session_state["bulk_hasil"] = hasil
+            st.session_state["hasil_upload"] = hasil
             st.rerun()
     
-    # Tampilkan hasil analisa (kalau sudah ada)
-    if "bulk_hasil" in st.session_state and st.session_state["bulk_hasil"]:
-        hasil = st.session_state["bulk_hasil"]
+    # Tampilkan hasil analisa
+    if "hasil_upload" in st.session_state and st.session_state["hasil_upload"]:
+        hasil = st.session_state["hasil_upload"]
         
         st.markdown("---")
         st.markdown("### ✏️ Koreksi Skor (kalau AI salah)")
@@ -396,70 +396,69 @@ if st.session_state.halaman == "bulk":
                     
                     c1, c2, c3 = st.columns(3)
                     with c1:
-                        new_nasi = st.selectbox("🍚 Nasi", [0,1,2,3,4,5], index=h['nasi'], key=f"bulk_nasi_{i}")
+                        new_nasi = st.selectbox("🍚 Nasi", [0,1,2,3,4,5], index=h['nasi'], key=f"nasi_{i}")
                     with c2:
-                        new_sayur = st.selectbox("🥬 Sayur", [0,1,2,3,4,5], index=h['sayur'], key=f"bulk_sayur_{i}")
+                        new_sayur = st.selectbox("🥬 Sayur", [0,1,2,3,4,5], index=h['sayur'], key=f"sayur_{i}")
                     with c3:
-                        new_lauk = st.selectbox("🍗 Lauk", [0,1,2,3,4,5], index=h['lauk'], key=f"bulk_lauk_{i}")
+                        new_lauk = st.selectbox("🍗 Lauk", [0,1,2,3,4,5], index=h['lauk'], key=f"lauk_{i}")
                     
-                    # Update session state
-                    st.session_state["bulk_hasil"][i]['nasi'] = new_nasi
-                    st.session_state["bulk_hasil"][i]['sayur'] = new_sayur
-                    st.session_state["bulk_hasil"][i]['lauk'] = new_lauk
+                    st.session_state["hasil_upload"][i]['nasi'] = new_nasi
+                    st.session_state["hasil_upload"][i]['sayur'] = new_sayur
+                    st.session_state["hasil_upload"][i]['lauk'] = new_lauk
         
         st.markdown("---")
         
         # Tombol simpan semua
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("💾 Simpan Semua ke Sheets & Drive"):
+            if st.button("💾 Simpan Semua"):
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 
                 sukses = 0
                 gagal = 0
                 
-                for i, h in enumerate(st.session_state["bulk_hasil"]):
-                    status_text.info(f"⏳ Menyimpan {i+1}/{len(st.session_state['bulk_hasil'])}: {h['nama']}")
+                for i, h in enumerate(st.session_state["hasil_upload"]):
+                    status_text.info(f"⏳ Menyimpan {i+1}/{len(st.session_state['hasil_upload'])}: {h['nama']}")
                     
                     try:
                         # Upload foto ke Drive
-                        filename = f"{user['kode_sekolah']}_{tanggal_bulk}_bulk_{i+1:03d}_{h['nama']}"
+                        filename = f"{user['kode_sekolah']}_{tanggal_upload}_{i+1:03d}_{h['nama']}"
                         link_foto = upload_foto(
                             h['file'].getvalue(),
                             filename,
-                            subfolder=f"{user['kode_sekolah']}/{tanggal_bulk}/bulk"
+                            subfolder=f"{user['kode_sekolah']}/{tanggal_upload}"
                         )
                         
                         # Hitung
-                        total_awal = bulk_ba_nasi + bulk_ba_sayur + bulk_ba_lauk
+                        total_awal = ba_nasi + ba_sayur + ba_lauk
                         pn = skor_ke_persentase_sisa(h['nasi'])
                         ps = skor_ke_persentase_sisa(h['sayur'])
                         pl = skor_ke_persentase_sisa(h['lauk'])
-                        bsn = bulk_ba_nasi * pn
-                        bss = bulk_ba_sayur * ps
-                        bsl = bulk_ba_lauk * pl
+                        bsn = ba_nasi * pn
+                        bss = ba_sayur * ps
+                        bsl = ba_lauk * pl
                         total_sisa = bsn + bss + bsl
-                        el = hitung_economic_loss(total_awal, total_sisa, bulk_harga)
+                        el = hitung_economic_loss(total_awal, total_sisa, harga_upload)
                         
                         row = {
                             "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            "Tanggal": str(tanggal_bulk),
+                            "Tanggal": str(tanggal_upload),
                             "Hari Ke-": 0,
                             "Kode Sekolah": user['kode_sekolah'],
                             "Nama Sekolah": SEKOLAH_LIST[user['kode_sekolah']],
                             "Nama Enumerator": user['nama'],
                             "Email Enumerator": user.get('email', '-'),
-                            "ID Siswa": f"BULK-{i+1:03d}",
-                            "Kelas": "Bulk",
-                            "Skor Visual Nasi": h['nasi'], "Berat Awal Nasi (g)": bulk_ba_nasi,
+                            "ID Siswa": str(i + 1),
+                            "Kelas": "-",
+                            "Skor Visual Nasi": h['nasi'], "Berat Awal Nasi (g)": ba_nasi,
                             "Berat Sisa Nasi (g)": round(bsn,1), "% Sisa Nasi": round(pn,4),
-                            "Skor Visual Sayur": h['sayur'], "Berat Awal Sayur (g)": bulk_ba_sayur,
+                            "Skor Visual Sayur": h['sayur'], "Berat Awal Sayur (g)": ba_sayur,
                             "Berat Sisa Sayur (g)": round(bss,1), "% Sisa Sayur": round(ps,4),
-                            "Skor Visual Lauk": h['lauk'], "Berat Awal Lauk (g)": bulk_ba_lauk,
+                            "Skor Visual Lauk": h['lauk'], "Berat Awal Lauk (g)": ba_lauk,
                             "Berat Sisa Lauk (g)": round(bsl,1), "% Sisa Lauk": round(pl,4),
                             "Total Awal (g)": total_awal, "Total Sisa (g)": round(total_sisa,1),
-                            "Harga Satuan (Rp)": bulk_harga,
+                            "Harga Satuan (Rp)": harga_upload,
                             "Economic Loss (Rp)": round(el,0),
                             "Keterangan": h['alasan'],
                             "Link Foto Sebelum": "",
@@ -470,20 +469,19 @@ if st.session_state.halaman == "bulk":
                     except Exception as e:
                         gagal += 1
                     
-                    progress_bar.progress((i + 1) / len(st.session_state["bulk_hasil"]))
+                    progress_bar.progress((i + 1) / len(st.session_state["hasil_upload"]))
                 
                 status_text.success(f"✅ Selesai! {sukses} sukses, {gagal} gagal.")
                 st.balloons()
                 
-                # Clear session
-                del st.session_state["bulk_hasil"]
+                del st.session_state["hasil_upload"]
                 
                 if st.button("🔄 Upload Lagi"):
                     st.rerun()
         
         with col2:
             if st.button("🗑️ Batal"):
-                del st.session_state["bulk_hasil"]
+                del st.session_state["hasil_upload"]
                 st.rerun()
     
     st.markdown('</div>', unsafe_allow_html=True)
@@ -545,6 +543,6 @@ elif st.session_state.halaman == "dashboard":
     st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown("---")
-    if st.button("⬅️ Kembali ke Upload Bulk"):
-        st.session_state.halaman = "bulk"
+    if st.button("⬅️ Kembali ke Upload"):
+        st.session_state.halaman = "upload"
         st.rerun()
