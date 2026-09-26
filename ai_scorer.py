@@ -81,7 +81,7 @@ def prediksi_skor_dari_foto(image_bytes):
         }
         """
         
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
         
         payload = {
             "contents": [{
