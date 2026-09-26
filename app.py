@@ -25,8 +25,17 @@ st.set_page_config(
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-    html, body, [class*="css"] { font-family: 'Poppins', sans-serif; color: #1a1a1a; }
-    .stApp { background: #f6e3b4; }
+    
+    html, body, [class*="css"] { 
+        font-family: 'Poppins', sans-serif; 
+        color: #1a1a1a;
+    }
+    
+    .stApp { 
+        background: #f6e3b4; 
+    }
+    
+    /* HEADER */
     .main-header {
         background: linear-gradient(135deg, #efd48a 0%, #f6e3b4 100%);
         border: 2px solid #c99a3a;
@@ -36,34 +45,229 @@ st.markdown("""
         margin-bottom: 1.5rem;
         box-shadow: 0 6px 18px rgba(138, 90, 43, 0.15);
     }
-    .main-header h1 { color: #1a1a1a !important; font-size: 1.8rem; font-weight: 800; margin: 0; letter-spacing: 1px; }
-    .main-header p { color: #5c3a1a !important; font-size: 0.85rem; margin: 0.5rem 0 0 0; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
-    .card { background: #ffffff; border: 2px solid #c99a3a; border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(138, 90, 43, 0.08); }
-    .section-title { color: #1a1a1a !important; font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 3px solid #c99a3a; display: inline-block; }
-    .metric-card { background: linear-gradient(135deg, #c99a3a 0%, #8a5a2b 100%); border-radius: 14px; padding: 1.1rem; color: white; text-align: center; margin: 0.3rem 0; box-shadow: 0 4px 12px rgba(201, 154, 58, 0.3); }
-    .metric-value { font-size: 1.6rem; font-weight: 800; }
-    .metric-label { font-size: 0.72rem; opacity: 0.95; letter-spacing: 1px; text-transform: uppercase; margin-top: 0.3rem; }
-    .metric-card-red { background: linear-gradient(135deg, #c0392b 0%, #8a1a10 100%); border-radius: 14px; padding: 1.1rem; color: white; text-align: center; margin: 0.3rem 0; }
-    .stButton > button { background: #c99a3a !important; color: white !important; border: none !important; border-radius: 22px !important; padding: 0.8rem 1.5rem !important; font-weight: 600 !important; width: 100% !important; }
-    .stButton > button:hover { background: #8a5a2b !important; }
+    .main-header h1 { 
+        color: #1a1a1a !important; 
+        font-size: 1.8rem; 
+        font-weight: 800; 
+        margin: 0; 
+        letter-spacing: 1px; 
+    }
+    .main-header p { 
+        color: #5c3a1a !important; 
+        font-size: 0.85rem; 
+        margin: 0.5rem 0 0 0; 
+        letter-spacing: 2px; 
+        text-transform: uppercase; 
+        font-weight: 600; 
+    }
+    
+    /* CARD */
+    .card { 
+        background: #ffffff; 
+        border: 2px solid #c99a3a; 
+        border-radius: 16px; 
+        padding: 1.5rem; 
+        margin-bottom: 1rem; 
+        box-shadow: 0 4px 12px rgba(138, 90, 43, 0.08); 
+    }
+    .section-title { 
+        color: #1a1a1a !important; 
+        font-size: 1.1rem; 
+        font-weight: 700; 
+        margin-bottom: 1rem; 
+        padding-bottom: 0.5rem; 
+        border-bottom: 3px solid #c99a3a; 
+        display: inline-block; 
+    }
+    
+    /* METRIC */
+    .metric-card { 
+        background: linear-gradient(135deg, #c99a3a 0%, #8a5a2b 100%); 
+        border-radius: 14px; 
+        padding: 1.1rem; 
+        color: white; 
+        text-align: center; 
+        margin: 0.3rem 0; 
+    }
+    .metric-value { 
+        font-size: 1.6rem; 
+        font-weight: 800; 
+        color: white;
+    }
+    .metric-label { 
+        font-size: 0.72rem; 
+        opacity: 0.95; 
+        letter-spacing: 1px; 
+        text-transform: uppercase; 
+        margin-top: 0.3rem; 
+        color: white;
+    }
+    .metric-card-red { 
+        background: linear-gradient(135deg, #c0392b 0%, #8a1a10 100%); 
+        border-radius: 14px; 
+        padding: 1.1rem; 
+        color: white; 
+        text-align: center; 
+        margin: 0.3rem 0; 
+    }
+    
+    /* BUTTON */
+    .stButton > button { 
+        background: #c99a3a !important; 
+        color: white !important; 
+        border: none !important; 
+        border-radius: 22px !important; 
+        padding: 0.8rem 1.5rem !important; 
+        font-weight: 600 !important; 
+        width: 100% !important; 
+    }
+    .stButton > button:hover { 
+        background: #8a5a2b !important; 
+    }
+    
+    /* TEXT INPUT - HITAM, TEKS PUTIH */
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input,
-    .stTextArea > div > div > textarea { background-color: #1a1a1a !important; color: #ffffff !important; border: 2px solid #1a1a1a !important; border-radius: 10px !important; }
-    .stSelectbox > div > div { background-color: #1a1a1a !important; border: 2px solid #1a1a1a !important; border-radius: 10px !important; color: #ffffff !important; }
-    .stSelectbox [data-baseweb="select"] > div { background-color: #1a1a1a !important; color: #ffffff !important; }
-    .stSelectbox [data-baseweb="select"] svg { fill: #ffffff !important; }
-    [role="listbox"] { background-color: #1a1a1a !important; }
-    [role="option"] { background-color: #1a1a1a !important; color: #ffffff !important; }
-    [role="option"]:hover { background-color: #c99a3a !important; color: #1a1a1a !important; }
-    [aria-selected="true"] { background-color: #c99a3a !important; color: #1a1a1a !important; }
-    .stTextInput label, .stNumberInput label, .stSelectbox label, .stTextArea label, .stFileUploader label, .stDateInput label { color: #1a1a1a !important; font-weight: 600 !important; }
-    .stFileUploader > div > div { border: 2px dashed #c99a3a !important; border-radius: 12px !important; background: #f6e3b4 !important; }
-    section[data-testid="stSidebar"] { background: #efd48a; border-right: 2px solid #c99a3a; }
-    section[data-testid="stSidebar"] * { color: #1a1a1a; }
-    section[data-testid="stSidebar"] .stButton > button { background: white !important; color: #1a1a1a !important; border: 2px solid #8a5a2b !important; border-radius: 12px; margin-bottom: 0.5rem; }
-    .stProgress > div > div > div > div { background: #c99a3a !important; }
+    .stTextArea > div > div > textarea { 
+        background-color: #1a1a1a !important; 
+        color: #ffffff !important; 
+        border: 2px solid #1a1a1a !important; 
+        border-radius: 10px !important; 
+    }
+    .stTextInput > div > div > input::placeholder,
+    .stNumberInput > div > div > input::placeholder,
+    .stTextArea > div > div > textarea::placeholder {
+        color: #888888 !important;
+    }
+    
+    /* DATE INPUT */
+    .stDateInput > div > div > input {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        border: 2px solid #1a1a1a !important;
+        border-radius: 10px !important;
+    }
+    
+    /* SELECTBOX */
+    .stSelectbox > div > div { 
+        background-color: #1a1a1a !important; 
+        border: 2px solid #1a1a1a !important; 
+        border-radius: 10px !important; 
+        color: #ffffff !important; 
+    }
+    .stSelectbox [data-baseweb="select"] > div { 
+        background-color: #1a1a1a !important; 
+        color: #ffffff !important; 
+    }
+    .stSelectbox [data-baseweb="select"] svg { 
+        fill: #ffffff !important; 
+    }
+    [role="listbox"] { 
+        background-color: #1a1a1a !important; 
+    }
+    [role="option"] { 
+        background-color: #1a1a1a !important; 
+        color: #ffffff !important; 
+    }
+    [role="option"]:hover { 
+        background-color: #c99a3a !important; 
+        color: #1a1a1a !important; 
+    }
+    [aria-selected="true"] { 
+        background-color: #c99a3a !important; 
+        color: #1a1a1a !important; 
+    }
+    
+    /* LABELS - HITAM */
+    .stTextInput label, 
+    .stNumberInput label, 
+    .stSelectbox label, 
+    .stTextArea label, 
+    .stFileUploader label, 
+    .stDateInput label,
+    .stCheckbox label,
+    .stRadio label { 
+        color: #1a1a1a !important; 
+        font-weight: 600 !important; 
+    }
+    
+    /* CAPTION */
+    .stCaption, [data-testid="stCaptionContainer"] {
+        color: #5c3a1a !important;
+        font-weight: 500 !important;
+    }
+    
+    /* MARKDOWN TEXT */
+    .stMarkdown p, .stMarkdown li, .stMarkdown span {
+        color: #1a1a1a;
+    }
+    
+    /* FILE UPLOADER */
+    .stFileUploader > div > div { 
+        border: 2px dashed #c99a3a !important; 
+        border-radius: 12px !important; 
+        background: #f6e3b4 !important; 
+    }
+    .stFileUploader > div > div > div {
+        color: #1a1a1a !important;
+    }
+    .stFileUploader button {
+        background-color: #c99a3a !important;
+        color: white !important;
+        border-radius: 10px !important;
+        border: none !important;
+    }
+    
+    /* ALERT BOXES */
+    .stAlert {
+        border-radius: 12px !important;
+    }
+    .stAlert p {
+        color: #1a1a1a !important;
+    }
+    
+    /* SIDEBAR */
+    section[data-testid="stSidebar"] { 
+        background: #efd48a; 
+        border-right: 2px solid #c99a3a; 
+    }
+    section[data-testid="stSidebar"] * { 
+        color: #1a1a1a !important; 
+    }
+    section[data-testid="stSidebar"] .stButton > button { 
+        background: white !important; 
+        color: #1a1a1a !important; 
+        border: 2px solid #8a5a2b !important; 
+        border-radius: 12px; 
+        margin-bottom: 0.5rem; 
+    }
+    section[data-testid="stSidebar"] .stButton > button:hover {
+        background: #8a5a2b !important;
+        color: white !important;
+    }
+    
+    /* PROGRESS BAR */
+    .stProgress > div > div > div > div { 
+        background: #c99a3a !important; 
+    }
+    
+    /* METRIC NATIVE STREAMLIT */
+    [data-testid="stMetricValue"] {
+        color: #1a1a1a !important;
+        font-weight: 800 !important;
+    }
+    [data-testid="stMetricLabel"] {
+        color: #5c3a1a !important;
+        font-weight: 600 !important;
+    }
+    
+    /* HIDE STREAMLIT BRANDING */
     #MainMenu, footer, header {visibility: hidden;}
-    @media (max-width: 768px) { .main-header h1 { font-size: 1.3rem; } .card { padding: 1rem; } }
+    
+    @media (max-width: 768px) { 
+        .main-header h1 { font-size: 1.3rem; } 
+        .card { padding: 1rem; } 
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -167,12 +371,11 @@ if st.session_state.halaman == "input":
             st.markdown("**📷 Foto Sisa Makanan Siswa Ini**")
             foto_sisa = st.file_uploader("Upload foto sisa", type=["jpg","jpeg","png"], key=f"fs_{sudah}")
             
-            # Default skor = 0 (kalau AI tidak jalan)
+            # Default skor = 0
             default_nasi = 0
             default_sayur = 0
             default_lauk = 0
             ai_alasan = ""
-            ai_sukses = False
             
             if foto_sisa:
                 st.image(foto_sisa, caption="Sisa Makanan", use_container_width=True)
@@ -192,14 +395,15 @@ if st.session_state.halaman == "input":
                     default_sayur = skor_ai.get("sayur", 0)
                     default_lauk = skor_ai.get("lauk", 0)
                     ai_alasan = skor_ai.get("alasan", "")
-                    ai_sukses = True
-                    st.success(f"🤖 Saran AI: Nasi={default_nasi}, Sayur={default_sayur}, Lauk={default_lauk}")
+                    
+                    # Tampilkan notifikasi kecil (bukan di luar dropdown)
+                    st.success(f"🤖 AI sudah mengisi skor otomatis. Silakan verifikasi/koreksi.")
                     if ai_alasan:
                         st.caption(f"💬 {ai_alasan}")
                 else:
                     st.info("ℹ️ AI tidak tersedia. Silakan input manual.")
             
-            st.markdown("**🎯 Skor Comstock (0-5)** — AI sudah mengisi, tinggal verifikasi/koreksi")
+            st.markdown("**🎯 Skor Comstock (0-5)**")
             
             col1, col2, col3 = st.columns(3)
             with col1:
