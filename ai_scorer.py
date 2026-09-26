@@ -7,9 +7,9 @@ import os
 
 
 def get_gemini_key():
-    """Ambil API key Gemini dari config.json."""
-    if os.path.exists("config.json"):
-        with open("config.json") as f:
+    """Ambil API key Gemini dari credentials.json."""
+    if os.path.exists("credentials.json"):
+        with open("credentials.json") as f:
             config = json.load(f)
             return config.get("gemini_api_key", "")
     return ""
@@ -20,7 +20,7 @@ def prediksi_skor_dari_foto(image_bytes):
         api_key = get_gemini_key()
         
         if not api_key:
-            print("GEMINI key tidak ada di config.json")
+            print("GEMINI key tidak ada di credentials.json")
             return None
         
         genai.configure(api_key=api_key)
