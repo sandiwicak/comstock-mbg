@@ -1,4 +1,4 @@
-"""Comstock Digital MBG - Aplikasi Utama."""
+"""Comstock Digital MBG - Aplikasi Utama (tanpa AI, tanpa keterangan)."""
 import streamlit as st
 import pandas as pd
 import time
@@ -10,7 +10,6 @@ from comstock_utils import (
 )
 from gsheet_helper import simpan_data, ambil_semua_data
 from gdrive_helper import upload_foto
-from ai_scorer import prediksi_skor_dari_foto
 
 
 st.set_page_config(
@@ -232,7 +231,6 @@ st.markdown(f"""
 if st.session_state.halaman == "upload":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📸 Upload Foto Sisa</div>', unsafe_allow_html=True)
-    st.caption("Upload foto sisa makanan. AI akan menganalisa otomatis. Tunggu sampai semua selesai.")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -248,7 +246,6 @@ if st.session_state.halaman == "upload":
     
     st.markdown("---")
     st.markdown("**📷 Upload Foto Sisa (bisa banyak sekaligus)**")
-    st.caption("Tips: Klik 'Browse files', lalu Ctrl + Klik beberapa foto, atau drag & drop.")
     
     uploader_key = f"upload_fotos_v{st.session_state.uploader_version}"
     
@@ -263,92 +260,48 @@ if st.session_state.halaman == "upload":
     if foto_list:
         st.success(f"✅ {len(foto_list)} foto terpilih")
         
-        cols = st.columns(min(len(foto_list), 4))
-        for i, f in enumerate(foto_list):
-            with cols[i % 4]:
-                st.image(f, caption=f.name[:12], use_container_width=True)
-        
         st.markdown("---")
-        st.info(f"⏱️ Estimasi waktu proses: ~{len(foto_list) * 15} detik. Jangan tutup browser.")
         
-        if st.button("🚀 Proses Semua Foto dengan AI"):
-            progress_bar = st.progress(0)
-            status_text = st.empty()
-            
-            hasil = []
-            gagal_count = 0
-            
-            for idx, foto in enumerate(foto_list):
-                status_text.info(f"⏳ Menganalisa foto {idx+1}/{len(foto_list)}: {foto.name}")
-                
-                try:
-                    skor_ai = prediksi_skor_dari_foto(foto.getvalue())
-                    
-                    if skor_ai:
-                        hasil.append({
-                            "idx": idx, "file": foto, "nama": foto.name,
-                            "nasi": int(skor_ai.get("nasi", 0)),
-                            "sayur": int(skor_ai.get("sayur", 0)),
-                            "lauk": int(skor_ai.get("lauk", 0)),
-                            "alasan": skor_ai.get("alasan", ""),
-                            "error": None
-                        })
-                    else:
-                        gagal_count += 1
-                        hasil.append({
-                            "idx": idx, "file": foto, "nama": foto.name,
-                            "nasi": 0, "sayur": 0, "lauk": 0,
-                            "alasan": "AI tidak tersedia, silakan isi manual",
-                            "error": None
-                        })
-                except Exception as e:
-                    gagal_count += 1
-                    hasil.append({
-                        "idx": idx, "file": foto, "nama": foto.name,
-                        "nasi": 0, "sayur": 0, "lauk": 0,
-                        "alasan": f"Error: {str(e)[:50]}",
-                        "error": str(e)
-                    })
-                
-                progress_bar.progress((idx + 1) / len(foto_list))
-                
-                if idx < len(foto_list) - 1:
-                    time.sleep(1)
-            
-            if gagal_count > 0:
-                status_text.warning(f"⚠️ Selesai. {gagal_count} foto gagal dianalisa AI (isi manual).")
-            else:
-                status_text.success(f"✅ Analisa selesai! Semua {len(foto_list)} foto berhasil.")
-            
-            st.session_state["hasil_upload"] = hasil
-            st.rerun()
-    
-    if "hasil_upload" in st.session_state and st.session_state["hasil_upload"]:
-        hasil = st.session_state["hasil_upload"]
+        if "skor_manual" not in st.session_state:
+            st.session_state.skor_manual = {}
         
-        st.markdown("---")
-        st.markdown("### ✏️ Koreksi Skor (kalau AI salah)")
-        st.caption("Ubah skor di dropdown kalau AI salah. Kalau sudah benar, langsung klik Simpan Semua.")
+        if st.session_state.get("skor_version") != st.session_state.uploader_version:
+            st.session_state.skor_manual = {}
+            st.session_state.skor_version = st.session_state.uploader_version
         
-        for i, h in enumerate(hasil):
-            with st.expander(f"📷 {h['nama']} — Nasi:{h['nasi']} Sayur:{h['sayur']} Lauk:{h['lauk']}", expanded=False):
-                col1, col2 = st.columns([1, 2])
-                with col1:
-                    st.image(h['file'], use_container_width=True)
-                with col2:
-                    st.caption(f"💬 {h['alasan']}")
-                    
-                    c1, c2, c3 = st.columns(3)
-                    with c1:
-                        new_nasi = st.selectbox("🍚 Nasi", [0,1,2,3,4,5], index=h['nasi'], key=f"nasi_{i}")
-                    with c2:
-                        new_sayur = st.selectbox("🥬 Sayur", [0,1,2,3,4,5], index=h['sayur'], key=f"sayur_{i}")
-                    with c3:
-                        new_lauk = st.selectbox("🍗 Lauk", [0,1,2,3,4,5], index=h['lauk'], key=f"lauk_{i}")
-                    
-                    st.session_state["hasil_upload"][i]['nasi'] = new_nasi
-                    st.session_state["hasil_upload"][i]['sayur'] = new_sayur
-                    st.session_state["hasil_upload"][i]['lauk'] = new_lauk
+        for i, foto in enumerate(foto_list):
+            st.markdown(f"---")
+            st.markdown(f"**Foto {i+1}: {foto.name}**")
+            
+            col1, col2 = st.columns([1, 2])
+            
+            with col1:
+                st.image(foto, use_container_width=True)
+            
+            with col2:
+                c1, c2, c3 = st.columns(3)
+                with c1:
+                    nasi_val = st.selectbox(
+                        "🍚 Nasi", [0,1,2,3,4,5], 
+                        index=st.session_state.skor_manual.get(f"nasi_{i}", 0), 
+                        key=f"nasi_{i}_{st.session_state.uploader_version}"
+                    )
+                with c2:
+                    sayur_val = st.selectbox(
+                        "🥬 Sayur", [0,1,2,3,4,5], 
+                        index=st.session_state.skor_manual.get(f"sayur_{i}", 0), 
+                        key=f"sayur_{i}_{st.session_state.uploader_version}"
+                    )
+                with c3:
+                    lauk_val = st.selectbox(
+                        "🍗 Lauk", [0,1,2,3,4,5], 
+                        index=st.session_state.skor_manual.get(f"lauk_{i}", 0), 
+                        key=f"lauk_{i}_{st.session_state.uploader_version}"
+                    )
+                
+                st.session_state.skor_manual[f"nasi_{i}"] = nasi_val
+                st.session_state.skor_manual[f"sayur_{i}"] = sayur_val
+                st.session_state.skor_manual[f"lauk_{i}"] = lauk_val
         
         st.markdown("---")
         
@@ -361,21 +314,25 @@ if st.session_state.halaman == "upload":
                 sukses = 0
                 gagal = 0
                 
-                for i, h in enumerate(st.session_state["hasil_upload"]):
-                    status_text.info(f"⏳ Menyimpan {i+1}/{len(st.session_state['hasil_upload'])}: {h['nama']}")
+                for i, foto in enumerate(foto_list):
+                    status_text.info(f"⏳ Menyimpan {i+1}/{len(foto_list)}: {foto.name}")
                     
                     try:
-                        filename = f"{user['kode_sekolah']}_{tanggal_upload}_{i+1:03d}_{h['nama']}"
+                        nasi_val = st.session_state.skor_manual.get(f"nasi_{i}", 0)
+                        sayur_val = st.session_state.skor_manual.get(f"sayur_{i}", 0)
+                        lauk_val = st.session_state.skor_manual.get(f"lauk_{i}", 0)
+                        
+                        filename = f"{user['kode_sekolah']}_{tanggal_upload}_{i+1:03d}_{foto.name}"
                         link_foto = upload_foto(
-                            h['file'].getvalue(),
+                            foto.getvalue(),
                             filename,
                             subfolder=f"{user['kode_sekolah']}/{tanggal_upload}"
                         )
                         
                         total_awal = ba_nasi + ba_sayur + ba_lauk
-                        pn = skor_ke_persentase_sisa(h['nasi'])
-                        ps = skor_ke_persentase_sisa(h['sayur'])
-                        pl = skor_ke_persentase_sisa(h['lauk'])
+                        pn = skor_ke_persentase_sisa(nasi_val)
+                        ps = skor_ke_persentase_sisa(sayur_val)
+                        pl = skor_ke_persentase_sisa(lauk_val)
                         bsn = ba_nasi * pn
                         bss = ba_sayur * ps
                         bsl = ba_lauk * pl
@@ -392,16 +349,16 @@ if st.session_state.halaman == "upload":
                             "Email Enumerator": user.get('email', '-'),
                             "ID Siswa": str(i + 1),
                             "Kelas": "-",
-                            "Skor Visual Nasi": h['nasi'], "Berat Awal Nasi (g)": ba_nasi,
+                            "Skor Visual Nasi": nasi_val, "Berat Awal Nasi (g)": ba_nasi,
                             "Berat Sisa Nasi (g)": round(bsn,1), "% Sisa Nasi": round(pn,4),
-                            "Skor Visual Sayur": h['sayur'], "Berat Awal Sayur (g)": ba_sayur,
+                            "Skor Visual Sayur": sayur_val, "Berat Awal Sayur (g)": ba_sayur,
                             "Berat Sisa Sayur (g)": round(bss,1), "% Sisa Sayur": round(ps,4),
-                            "Skor Visual Lauk": h['lauk'], "Berat Awal Lauk (g)": ba_lauk,
+                            "Skor Visual Lauk": lauk_val, "Berat Awal Lauk (g)": ba_lauk,
                             "Berat Sisa Lauk (g)": round(bsl,1), "% Sisa Lauk": round(pl,4),
                             "Total Awal (g)": total_awal, "Total Sisa (g)": round(total_sisa,1),
                             "Harga Satuan (Rp)": harga_upload,
                             "Economic Loss (Rp)": round(el,0),
-                            "Keterangan": h['alasan'],
+                            "Keterangan": "",
                             "Link Foto Sebelum": "",
                             "Link Foto Sesudah": link_foto,
                         }
@@ -410,11 +367,11 @@ if st.session_state.halaman == "upload":
                     except Exception as e:
                         gagal += 1
                     
-                    progress_bar.progress((i + 1) / len(st.session_state["hasil_upload"]))
+                    progress_bar.progress((i + 1) / len(foto_list))
                 
                 status_text.success(f"✅ Selesai! {sukses} sukses, {gagal} gagal.")
                 
-                del st.session_state["hasil_upload"]
+                st.session_state.skor_manual = {}
                 st.session_state.uploader_version += 1
                 
                 time.sleep(2)
@@ -422,11 +379,8 @@ if st.session_state.halaman == "upload":
         
         with col2:
             if st.button("🗑️ Batal"):
-                if "hasil_upload" in st.session_state:
-                    del st.session_state["hasil_upload"]
-                
+                st.session_state.skor_manual = {}
                 st.session_state.uploader_version += 1
-                
                 time.sleep(1)
                 st.rerun()
     
