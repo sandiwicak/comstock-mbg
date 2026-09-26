@@ -1,9 +1,10 @@
-"""AI Scorer - Gemini via REST API (versi paling simpel)."""
-import requests
-import base64
-import json
+"""AI Scorer - Gemini via google-genai SDK (paling stabil)."""
 import os
+import json
 import streamlit as st
+from google import genai
+from PIL import Image
+from io import BytesIO
 
 
 def get_gemini_key():
@@ -23,7 +24,8 @@ def prediksi_skor_dari_foto(image_bytes):
             st.error("GEMINI key tidak ada di credentials.json")
             return None
 
-        img_b64 = base64.b64encode(image_bytes).decode("utf-8")
+        client = genai.Client(api_key=api_key)
+        img = Image.open(BytesIO(image_bytes))
 
         prompt = """
         Anda ahli gizi menganalisa foto tray makanan MBG Indonesia.
@@ -34,44 +36,14 @@ def prediksi_skor_dari_foto(image_bytes):
         {"nasi": 0, "sayur": 0, "lauk": 0, "confidence": 0.0, "alasan": "..."}
         """
 
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + api_key
-
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt},
-                        {
-                            "inline_data": {
-                                "mime_type": "image/jpeg",
-                                "data": img_b64
-                            }
-                        }
-                    ]
-                }
-            ]
-        }
-
         st.info("Mengirim foto ke Gemini...")
 
-        response = requests.post(
-            url,
-            json=payload,
-            headers={"Content-Type": "application/json"},
-            timeout=30
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[prompt, img]
         )
 
-        st.info("HTTP Status = " + str(response.status_code))
-
-        if response.status_code != 200:
-            st.error("Error: " + str(response.status_code))
-            st.error("Detail: " + response.text[:500])
-            return None
-
-        data = response.json()
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-        text = text.strip()
-
+        text = response.text.strip()
         if "```" in text:
             text = text.split("```")[1]
             if text.startswith("json"):
