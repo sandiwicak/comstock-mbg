@@ -51,7 +51,7 @@ def prediksi_skor_dari_foto(image_bytes):
         url = "https://api.groq.com/openai/v1/chat/completions"
 
         payload = {
-            "model": "qwen/qwen3.8-27b",
+            "model": ""model": "meta-llama/llama-4-scout-17b-16e-instruct",
             "messages": [
                 {
                     "role": "user",
