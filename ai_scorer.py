@@ -5,6 +5,7 @@ from PIL import Image
 from io import BytesIO
 import json
 
+
 def get_gemini_key():
     """Ambil API key Gemini, gabung dari 2 bagian."""
     try:
@@ -14,12 +15,13 @@ def get_gemini_key():
     except Exception:
         return ""
 
+
 def prediksi_skor_dari_foto(image_bytes):
     try:
         api_key = get_gemini_key()
         
         if not api_key:
-            st.warning("⚠️ GEMINI_API_KEY tidak tersedia.")
+            st.warning("⚠️ GEMINI_KEY tidak tersedia di Secrets.")
             return None
         
         genai.configure(api_key=api_key)
