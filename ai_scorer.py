@@ -1,21 +1,18 @@
 """AI Scorer - Gemini Vision."""
-import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 from io import BytesIO
 import json
+import os
 
 
 def get_gemini_key():
-    """Gabung API key Gemini dari 4 bagian."""
-    try:
-        p1 = st.secrets.get("GEMINI_P1", "")
-        p2 = st.secrets.get("GEMINI_P2", "")
-        p3 = st.secrets.get("GEMINI_P3", "")
-        p4 = st.secrets.get("GEMINI_P4", "")
-        return p1 + p2 + p3 + p4
-    except Exception:
-        return ""
+    """Ambil API key Gemini dari config.json."""
+    if os.path.exists("config.json"):
+        with open("config.json") as f:
+            config = json.load(f)
+            return config.get("gemini_api_key", "")
+    return ""
 
 
 def prediksi_skor_dari_foto(image_bytes):
@@ -23,7 +20,7 @@ def prediksi_skor_dari_foto(image_bytes):
         api_key = get_gemini_key()
         
         if not api_key:
-            st.warning("⚠️ GEMINI_KEY tidak tersedia di Secrets.")
+            print("GEMINI key tidak ada di config.json")
             return None
         
         genai.configure(api_key=api_key)
@@ -71,5 +68,5 @@ def prediksi_skor_dari_foto(image_bytes):
         return result
         
     except Exception as e:
-        st.error(f"❌ Error Gemini: {e}")
+        print(f"Error Gemini: {e}")
         return None
