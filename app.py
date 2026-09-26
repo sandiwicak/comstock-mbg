@@ -184,10 +184,10 @@ st.markdown("""
 # ============ SESSION STATE ============
 if "halaman" not in st.session_state: st.session_state.halaman = "upload"
 if "uploader_version" not in st.session_state: st.session_state.uploader_version = 0
+if "ai_version" not in st.session_state: st.session_state.ai_version = 0
 if "kode_sekolah" not in st.session_state: st.session_state.kode_sekolah = "SDN01-LB"
 if "nama_enum" not in st.session_state: st.session_state.nama_enum = "Enumerator"
 
-# User dari session state
 user = {
     "nama": st.session_state.nama_enum,
     "kode_sekolah": st.session_state.kode_sekolah,
@@ -263,12 +263,14 @@ if st.session_state.halaman == "upload":
         
         st.markdown("---")
         
+        # Init skor
         if "skor_manual" not in st.session_state:
             st.session_state.skor_manual = {}
         
         if st.session_state.get("skor_version") != st.session_state.uploader_version:
             st.session_state.skor_manual = {}
             st.session_state.skor_version = st.session_state.uploader_version
+            st.session_state.ai_version = 0
         
         # Tombol proses AI
         if st.button("🚀 Proses Semua Foto dengan AI"):
@@ -298,6 +300,9 @@ if st.session_state.halaman == "upload":
                 if idx < len(foto_list) - 1:
                     time.sleep(1)
             
+            # NAIKKAN ai_version biar dropdown re-render
+            st.session_state.ai_version += 1
+            
             if gagal_count > 0:
                 status_text.warning(f"⚠️ {gagal_count} foto gagal dianalisa AI (isi manual).")
             else:
@@ -323,25 +328,25 @@ if st.session_state.halaman == "upload":
                     nasi_val = st.selectbox(
                         "🍚 Nasi", [0,1,2,3,4,5], 
                         index=st.session_state.skor_manual.get(f"nasi_{i}", 0), 
-                        key=f"nasi_{i}_{st.session_state.uploader_version}"
+                        key=f"nasi_{i}_{st.session_state.uploader_version}_{st.session_state.ai_version}"
                     )
                 with c2:
                     sayur_val = st.selectbox(
                         "🥬 Sayur", [0,1,2,3,4,5], 
                         index=st.session_state.skor_manual.get(f"sayur_{i}", 0), 
-                        key=f"sayur_{i}_{st.session_state.uploader_version}"
+                        key=f"sayur_{i}_{st.session_state.uploader_version}_{st.session_state.ai_version}"
                     )
                 with c3:
                     lauk_val = st.selectbox(
                         "🍗 Lauk", [0,1,2,3,4,5], 
                         index=st.session_state.skor_manual.get(f"lauk_{i}", 0), 
-                        key=f"lauk_{i}_{st.session_state.uploader_version}"
+                        key=f"lauk_{i}_{st.session_state.uploader_version}_{st.session_state.ai_version}"
                     )
                 
                 ket_val = st.text_input(
                     "Keterangan",
                     value=st.session_state.skor_manual.get(f"ket_{i}", ""),
-                    key=f"ket_{i}_{st.session_state.uploader_version}"
+                    key=f"ket_{i}_{st.session_state.uploader_version}_{st.session_state.ai_version}"
                 )
                 
                 st.session_state.skor_manual[f"nasi_{i}"] = nasi_val
@@ -420,6 +425,7 @@ if st.session_state.halaman == "upload":
                 
                 st.session_state.skor_manual = {}
                 st.session_state.uploader_version += 1
+                st.session_state.ai_version = 0
                 
                 time.sleep(2)
                 st.rerun()
@@ -428,6 +434,7 @@ if st.session_state.halaman == "upload":
             if st.button("🗑️ Batal"):
                 st.session_state.skor_manual = {}
                 st.session_state.uploader_version += 1
+                st.session_state.ai_version = 0
                 time.sleep(1)
                 st.rerun()
     
