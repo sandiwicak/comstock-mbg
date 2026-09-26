@@ -1,10 +1,10 @@
-"""AI Scorer - Gemini Vision (pakai google-genai library baru)."""
+"""AI Scorer - Gemini Vision (dengan debug error)."""
 from google import genai
-from google.genai import types
 from PIL import Image
 from io import BytesIO
 import json
 import os
+import streamlit as st
 
 
 def get_gemini_key():
@@ -21,10 +21,11 @@ def prediksi_skor_dari_foto(image_bytes):
         api_key = get_gemini_key()
         
         if not api_key:
-            print("GEMINI key tidak ada di credentials.json")
+            st.error("❌ Debug: GEMINI key tidak ada di credentials.json")
             return None
         
-        # Pakai library baru google-genai
+        st.info(f"🔍 Debug: API key ditemukan (panjang {len(api_key)})")
+        
         client = genai.Client(api_key=api_key)
         
         img = Image.open(BytesIO(image_bytes))
@@ -56,10 +57,14 @@ def prediksi_skor_dari_foto(image_bytes):
         }
         """
         
+        st.info("🔍 Debug: Mengirim foto ke Gemini...")
+        
         response = client.models.generate_content(
             model='gemini-2.0-flash',
             contents=[prompt, img]
         )
+        
+        st.info(f"🔍 Debug: Response diterima!")
         
         text = response.text.strip()
         
@@ -70,8 +75,9 @@ def prediksi_skor_dari_foto(image_bytes):
         text = text.strip()
         
         result = json.loads(text)
+        st.success(f"✅ Debug: Berhasil parse JSON: {result}")
         return result
         
     except Exception as e:
-        print(f"Error Gemini: {e}")
+        st.error(f"❌ Error Gemini: {type(e).__name__}: {e}")
         return None
