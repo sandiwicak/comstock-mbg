@@ -1,4 +1,4 @@
-"""Comstock Digital MBG - Aplikasi Utama (tanpa login)."""
+"""Comstock Digital MBG - Aplikasi Utama (tanpa login, tanpa foto sebelum)."""
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -231,13 +231,6 @@ if st.session_state.halaman == "input":
             with col2:
                 kelas = st.selectbox("Kelas", ["Tinggi (4-6)", "Rendah (1-3)"], key=f"kls_{sudah}")
             
-            if sudah == 0:
-                st.markdown("**📷 Foto Sebelum Makan (referensi porsi hari ini)**")
-                foto_sebelum = st.file_uploader("Upload foto porsi awal", type=["jpg","jpeg","png"], key="foto_sebelum")
-                if foto_sebelum: st.image(foto_sebelum, caption="Porsi Awal", use_container_width=True)
-            else:
-                foto_sebelum = None
-            
             st.markdown("**📷 Foto Sisa Makanan Siswa Ini**")
             foto_sisa = st.file_uploader("Upload foto sisa", type=["jpg","jpeg","png"], key=f"fs_{sudah}")
             
@@ -303,13 +296,6 @@ if st.session_state.halaman == "input":
                                     f"{user['kode_sekolah']}_{setup['tanggal']}_{id_siswa}_sisa.jpg",
                                     subfolder=f"{user['kode_sekolah']}/{setup['tanggal']}"
                                 )
-                                link_sebelum = ""
-                                if foto_sebelum:
-                                    link_sebelum = upload_foto(
-                                        foto_sebelum.getvalue(),
-                                        f"{user['kode_sekolah']}_{setup['tanggal']}_referensi.jpg",
-                                        subfolder=f"{user['kode_sekolah']}/{setup['tanggal']}"
-                                    )
                                 
                                 total_awal = setup['ba_nasi'] + setup['ba_sayur'] + setup['ba_lauk']
                                 pn = skor_ke_persentase_sisa(sn)
@@ -341,7 +327,7 @@ if st.session_state.halaman == "input":
                                     "Harga Satuan (Rp)": setup['harga_porsi'],
                                     "Economic Loss (Rp)": round(el,0),
                                     "Keterangan": keterangan,
-                                    "Link Foto Sebelum": link_sebelum,
+                                    "Link Foto Sebelum": "",
                                     "Link Foto Sesudah": link_sisa,
                                 }
                                 simpan_data(row)
