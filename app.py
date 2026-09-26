@@ -14,6 +14,7 @@ from gdrive_helper import upload_foto
 from ai_scorer import prediksi_skor_dari_foto
 from auth import cek_login, login_google, logout
 
+
 st.set_page_config(
     page_title="Comstock Digital MBG",
     page_icon="🍽️",
@@ -24,381 +25,45 @@ st.set_page_config(
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-    
-    :root {
-        --cream: #f6e3b4;
-        --cream-dark: #efd48a;
-        --brown: #8a5a2b;
-        --brown-dark: #5c3a1a;
-        --gold: #c99a3a;
-        --white: #ffffff;
-        --black: #1a1a1a;
-        --text: #1a1a1a;
-        --muted: #6c5a3e;
-    }
-    
-    html, body, [class*="css"] { 
-        font-family: 'Poppins', sans-serif; 
-        color: var(--black);
-    }
-    
-    /* Background cream */
-    .stApp { 
-        background: var(--cream); 
-    }
-    
-    /* Header - judul HITAM */
+    html, body, [class*="css"] { font-family: 'Poppins', sans-serif; color: #1a1a1a; }
+    .stApp { background: #f6e3b4; }
     .main-header {
-        background: linear-gradient(135deg, var(--cream-dark) 0%, var(--cream) 100%);
-        border: 2px solid var(--gold);
+        background: linear-gradient(135deg, #efd48a 0%, #f6e3b4 100%);
+        border: 2px solid #c99a3a;
         border-radius: 20px;
         padding: 1.8rem 1.5rem;
         text-align: center;
         margin-bottom: 1.5rem;
         box-shadow: 0 6px 18px rgba(138, 90, 43, 0.15);
-        position: relative;
-        overflow: hidden;
     }
-    
-    .main-header::before {
-        content: "🌿";
-        position: absolute;
-        top: -10px;
-        right: 10px;
-        font-size: 60px;
-        opacity: 0.25;
-    }
-    
-    .main-header h1 { 
-        color: var(--black) !important; 
-        font-size: 1.8rem; 
-        font-weight: 800; 
-        margin: 0; 
-        letter-spacing: 1px;
-    }
-    
-    .main-header p { 
-        color: var(--brown-dark) !important; 
-        font-size: 0.85rem; 
-        margin: 0.5rem 0 0 0; 
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        font-weight: 600;
-    }
-    
-    /* Card putih dengan border gold */
-    .card {
-        background: var(--white);
-        border: 2px solid var(--gold);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 12px rgba(138, 90, 43, 0.08);
-    }
-    
-    .section-title {
-        color: var(--black) !important;
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 3px solid var(--gold);
-        display: inline-block;
-        letter-spacing: 0.5px;
-    }
-    
-    /* Metric card - gold gradient */
-    .metric-card {
-        background: linear-gradient(135deg, var(--gold) 0%, var(--brown) 100%);
-        border-radius: 14px;
-        padding: 1.1rem;
-        color: var(--white);
-        text-align: center;
-        margin: 0.3rem 0;
-        box-shadow: 0 4px 12px rgba(201, 154, 58, 0.3);
-    }
-    
-    .metric-value { 
-        font-size: 1.6rem; 
-        font-weight: 800; 
-        letter-spacing: 0.5px;
-    }
-    
-    .metric-label { 
-        font-size: 0.72rem; 
-        opacity: 0.95; 
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        margin-top: 0.3rem;
-    }
-    
-    /* Metric card merah - untuk economic loss */
-    .metric-card-red {
-        background: linear-gradient(135deg, #c0392b 0%, #8a1a10 100%);
-        border-radius: 14px;
-        padding: 1.1rem;
-        color: var(--white);
-        text-align: center;
-        margin: 0.3rem 0;
-        box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);
-    }
-    
-    /* Tombol gold - style Warner */
-    .stButton > button {
-        background: var(--gold) !important;
-        color: var(--white) !important;
-        border: none !important;
-        border-radius: 22px !important;
-        padding: 0.8rem 1.5rem !important;
-        font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        width: 100% !important;
-        letter-spacing: 0.5px;
-        transition: all 0.25s;
-        box-shadow: 0 4px 10px rgba(201, 154, 58, 0.25);
-    }
-    
-    .stButton > button:hover { 
-        background: var(--brown) !important;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(138, 90, 43, 0.4);
-    }
-    
-    /* ============================================
-       INPUT FIELDS - SEMUA HITAM SOLID
-       ============================================ */
-    
-    /* Text Input, Number Input */
+    .main-header h1 { color: #1a1a1a !important; font-size: 1.8rem; font-weight: 800; margin: 0; letter-spacing: 1px; }
+    .main-header p { color: #5c3a1a !important; font-size: 0.85rem; margin: 0.5rem 0 0 0; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
+    .card { background: #ffffff; border: 2px solid #c99a3a; border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(138, 90, 43, 0.08); }
+    .section-title { color: #1a1a1a !important; font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 3px solid #c99a3a; display: inline-block; }
+    .metric-card { background: linear-gradient(135deg, #c99a3a 0%, #8a5a2b 100%); border-radius: 14px; padding: 1.1rem; color: white; text-align: center; margin: 0.3rem 0; box-shadow: 0 4px 12px rgba(201, 154, 58, 0.3); }
+    .metric-value { font-size: 1.6rem; font-weight: 800; }
+    .metric-label { font-size: 0.72rem; opacity: 0.95; letter-spacing: 1px; text-transform: uppercase; margin-top: 0.3rem; }
+    .metric-card-red { background: linear-gradient(135deg, #c0392b 0%, #8a1a10 100%); border-radius: 14px; padding: 1.1rem; color: white; text-align: center; margin: 0.3rem 0; }
+    .stButton > button { background: #c99a3a !important; color: white !important; border: none !important; border-radius: 22px !important; padding: 0.8rem 1.5rem !important; font-weight: 600 !important; width: 100% !important; }
+    .stButton > button:hover { background: #8a5a2b !important; }
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input,
-    .stTextArea > div > div > textarea {
-        background-color: var(--black) !important;
-        color: var(--white) !important;
-        border: 2px solid var(--black) !important;
-        border-radius: 10px !important;
-        padding: 0.6rem 0.8rem !important;
-        font-family: 'Poppins', sans-serif !important;
-        font-weight: 500 !important;
-        font-size: 0.95rem !important;
-    }
-    
-    .stTextInput > div > div > input:focus,
-    .stNumberInput > div > div > input:focus,
-    .stTextArea > div > div > textarea:focus {
-        border-color: var(--gold) !important;
-        box-shadow: 0 0 0 3px rgba(201, 154, 58, 0.25) !important;
-        background-color: var(--black) !important;
-        color: var(--white) !important;
-    }
-    
-    /* Placeholder text */
-    .stTextInput > div > div > input::placeholder,
-    .stNumberInput > div > div > input::placeholder,
-    .stTextArea > div > div > textarea::placeholder {
-        color: #888888 !important;
-    }
-    
-    /* Selectbox - main container */
-    .stSelectbox > div > div {
-        background-color: var(--black) !important;
-        border: 2px solid var(--black) !important;
-        border-radius: 10px !important;
-        color: var(--white) !important;
-    }
-    
-    .stSelectbox > div > div > div {
-        background-color: var(--black) !important;
-        color: var(--white) !important;
-    }
-    
-    /* Selectbox - selected value text */
-    .stSelectbox [data-baseweb="select"] > div {
-        background-color: var(--black) !important;
-        color: var(--white) !important;
-        border: 2px solid var(--black) !important;
-        border-radius: 10px !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] > div:hover {
-        border-color: var(--gold) !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] svg {
-        fill: var(--white) !important;
-        color: var(--white) !important;
-    }
-    
-    /* Selectbox - dropdown menu (popover) */
-    [data-baseweb="popover"] {
-        background-color: var(--black) !important;
-    }
-    
-    [data-baseweb="popover"] > div {
-        background-color: var(--black) !important;
-    }
-    
-    [role="listbox"] {
-        background-color: var(--black) !important;
-    }
-    
-    [role="option"] {
-        background-color: var(--black) !important;
-        color: var(--white) !important;
-        font-family: 'Poppins', sans-serif !important;
-    }
-    
-    [role="option"]:hover {
-        background-color: var(--gold) !important;
-        color: var(--black) !important;
-    }
-    
-    [aria-selected="true"] {
-        background-color: var(--gold) !important;
-        color: var(--black) !important;
-    }
-    
-    /* Date input */
-    .stDateInput > div > div > input {
-        background-color: var(--black) !important;
-        color: var(--white) !important;
-        border: 2px solid var(--black) !important;
-        border-radius: 10px !important;
-    }
-    
-    /* Number input - stepper buttons */
-    .stNumberInput > div > div > button {
-        background-color: var(--gold) !important;
-        color: var(--white) !important;
-        border: none !important;
-    }
-    
-    .stNumberInput > div > div > button:hover {
-        background-color: var(--brown) !important;
-    }
-    
-    /* ============================================
-       LABELS - SEMUA HITAM
-       ============================================ */
-    .stTextInput label, 
-    .stNumberInput label, 
-    .stSelectbox label, 
-    .stTextArea label,
-    .stFileUploader label,
-    .stDateInput label {
-        color: var(--black) !important;
-        font-weight: 600 !important;
-        font-size: 0.88rem !important;
-    }
-    
-    /* Markdown text */
-    .stMarkdown p, .stMarkdown span, .stMarkdown div {
-        color: var(--black);
-    }
-    
-    /* File uploader */
-    .stFileUploader > div > div {
-        border: 2px dashed var(--gold) !important;
-        border-radius: 12px !important;
-        background: var(--cream) !important;
-    }
-    
-    .stFileUploader > div > div > div {
-        color: var(--black) !important;
-    }
-    
-    .stFileUploader button {
-        background-color: var(--gold) !important;
-        color: var(--white) !important;
-        border-radius: 10px !important;
-        border: none !important;
-    }
-    
-    /* ============================================
-       SIDEBAR
-       ============================================ */
-    section[data-testid="stSidebar"] {
-        background: var(--cream-dark);
-        border-right: 2px solid var(--gold);
-    }
-    
-    section[data-testid="stSidebar"] * {
-        color: var(--black);
-    }
-    
-    section[data-testid="stSidebar"] .stButton > button {
-        background: var(--white) !important;
-        color: var(--black) !important;
-        border: 2px solid var(--brown) !important;
-        border-radius: 12px;
-        margin-bottom: 0.5rem;
-        font-weight: 600 !important;
-    }
-    
-    section[data-testid="stSidebar"] .stButton > button:hover {
-        background: var(--brown) !important;
-        color: var(--white) !important;
-    }
-    
-    /* Progress bar */
-    .stProgress > div > div > div > div {
-        background: var(--gold) !important;
-    }
-    
-    /* Metric (native streamlit) */
-    [data-testid="stMetricValue"] {
-        color: var(--black) !important;
-        font-weight: 800 !important;
-    }
-    
-    [data-testid="stMetricLabel"] {
-        color: var(--muted) !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Info/Success/Error box */
-    .stAlert {
-        border-radius: 12px !important;
-        border-left: 4px solid var(--gold) !important;
-        color: var(--black) !important;
-    }
-    
-    .stAlert p {
-        color: var(--black) !important;
-    }
-    
-    /* DataFrame */
-    .stDataFrame {
-        border-radius: 12px !important;
-        overflow: hidden !important;
-    }
-    
-    /* Caption text */
-    .stCaption, [data-testid="stCaptionContainer"] {
-        color: var(--brown-dark) !important;
-        font-weight: 500 !important;
-    }
-    
-    /* Hide Streamlit branding */
+    .stTextArea > div > div > textarea { background-color: #1a1a1a !important; color: #ffffff !important; border: 2px solid #1a1a1a !important; border-radius: 10px !important; }
+    .stSelectbox > div > div { background-color: #1a1a1a !important; border: 2px solid #1a1a1a !important; border-radius: 10px !important; color: #ffffff !important; }
+    .stSelectbox [data-baseweb="select"] > div { background-color: #1a1a1a !important; color: #ffffff !important; }
+    .stSelectbox [data-baseweb="select"] svg { fill: #ffffff !important; }
+    [role="listbox"] { background-color: #1a1a1a !important; }
+    [role="option"] { background-color: #1a1a1a !important; color: #ffffff !important; }
+    [role="option"]:hover { background-color: #c99a3a !important; color: #1a1a1a !important; }
+    [aria-selected="true"] { background-color: #c99a3a !important; color: #1a1a1a !important; }
+    .stTextInput label, .stNumberInput label, .stSelectbox label, .stTextArea label, .stFileUploader label, .stDateInput label { color: #1a1a1a !important; font-weight: 600 !important; }
+    .stFileUploader > div > div { border: 2px dashed #c99a3a !important; border-radius: 12px !important; background: #f6e3b4 !important; }
+    section[data-testid="stSidebar"] { background: #efd48a; border-right: 2px solid #c99a3a; }
+    section[data-testid="stSidebar"] * { color: #1a1a1a; }
+    section[data-testid="stSidebar"] .stButton > button { background: white !important; color: #1a1a1a !important; border: 2px solid #8a5a2b !important; border-radius: 12px; margin-bottom: 0.5rem; }
+    .stProgress > div > div > div > div { background: #c99a3a !important; }
     #MainMenu, footer, header {visibility: hidden;}
-    
-    /* Scrollbar custom */
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-        background: var(--cream);
-    }
-    ::-webkit-scrollbar-thumb {
-        background: var(--gold);
-        border-radius: 4px;
-    }
-    
-    @media (max-width: 768px) {
-        .main-header h1 { font-size: 1.3rem; }
-        .main-header { padding: 1.2rem 1rem; }
-        .card { padding: 1rem; }
-        .metric-value { font-size: 1.3rem; }
-    }
+    @media (max-width: 768px) { .main-header h1 { font-size: 1.3rem; } .card { padding: 1rem; } }
 </style>
 """, unsafe_allow_html=True)
 
@@ -477,7 +142,7 @@ if st.session_state.halaman == "input":
         st.markdown(f"""
         <div class="card">
             <div class="section-title">📍 {SEKOLAH_LIST[user['kode_sekolah']]} — {setup['tanggal']}</div>
-            <p style="color: var(--black); font-weight: 600;">Progress: <b style="color: var(--brown-dark);">{sudah}/{target}</b> siswa</p>
+            <p style="color: #1a1a1a; font-weight: 600;">Progress: <b style="color: #5c3a1a;">{sudah}/{target}</b> siswa</p>
         </div>
         """, unsafe_allow_html=True)
         st.progress(sudah / target if target > 0 else 0)
@@ -502,26 +167,49 @@ if st.session_state.halaman == "input":
             st.markdown("**📷 Foto Sisa Makanan Siswa Ini**")
             foto_sisa = st.file_uploader("Upload foto sisa", type=["jpg","jpeg","png"], key=f"fs_{sudah}")
             
-            skor_ai = None
+            # Default skor = 0 (kalau AI tidak jalan)
+            default_nasi = 0
+            default_sayur = 0
+            default_lauk = 0
+            ai_alasan = ""
+            ai_sukses = False
+            
             if foto_sisa:
                 st.image(foto_sisa, caption="Sisa Makanan", use_container_width=True)
-                with st.spinner("🤖 AI menganalisis..."):
-                    skor_ai = prediksi_skor_dari_foto(foto_sisa.getvalue())
-                if skor_ai:
-                    st.success(f"🤖 Saran AI: Nasi={skor_ai.get('nasi',0)}, Sayur={skor_ai.get('sayur',0)}, Lauk={skor_ai.get('lauk',0)}")
+                
+                # Cache hasil AI biar tidak panggil ulang setiap rerun
+                cache_key = f"ai_result_{sudah}"
+                
+                if cache_key not in st.session_state:
+                    with st.spinner("🤖 AI menganalisis foto..."):
+                        skor_ai = prediksi_skor_dari_foto(foto_sisa.getvalue())
+                        st.session_state[cache_key] = skor_ai
                 else:
-                    st.info("ℹ️ Mode manual aktif (AI akan aktif setelah model siap).")
+                    skor_ai = st.session_state[cache_key]
+                
+                if skor_ai:
+                    default_nasi = skor_ai.get("nasi", 0)
+                    default_sayur = skor_ai.get("sayur", 0)
+                    default_lauk = skor_ai.get("lauk", 0)
+                    ai_alasan = skor_ai.get("alasan", "")
+                    ai_sukses = True
+                    st.success(f"🤖 Saran AI: Nasi={default_nasi}, Sayur={default_sayur}, Lauk={default_lauk}")
+                    if ai_alasan:
+                        st.caption(f"💬 {ai_alasan}")
+                else:
+                    st.info("ℹ️ AI tidak tersedia. Silakan input manual.")
             
-            st.markdown("**🎯 Skor Comstock (0-5)**")
+            st.markdown("**🎯 Skor Comstock (0-5)** — AI sudah mengisi, tinggal verifikasi/koreksi")
+            
             col1, col2, col3 = st.columns(3)
             with col1:
-                sn = st.selectbox("Nasi", [0,1,2,3,4,5], index=(skor_ai or {}).get('nasi', 0), key=f"sn_{sudah}")
+                sn = st.selectbox("Nasi", [0,1,2,3,4,5], index=default_nasi, key=f"sn_{sudah}")
                 st.caption(KETERANGAN_SKOR[sn])
             with col2:
-                ss = st.selectbox("Sayur", [0,1,2,3,4,5], index=(skor_ai or {}).get('sayur', 0), key=f"ss_{sudah}")
+                ss = st.selectbox("Sayur", [0,1,2,3,4,5], index=default_sayur, key=f"ss_{sudah}")
                 st.caption(KETERANGAN_SKOR[ss])
             with col3:
-                sl = st.selectbox("Lauk", [0,1,2,3,4,5], index=(skor_ai or {}).get('lauk', 0), key=f"sl_{sudah}")
+                sl = st.selectbox("Lauk", [0,1,2,3,4,5], index=default_lauk, key=f"sl_{sudah}")
                 st.caption(KETERANGAN_SKOR[sl])
             
             keterangan = st.text_input("Keterangan (opsional)", key=f"ket_{sudah}")
@@ -582,6 +270,11 @@ if st.session_state.halaman == "input":
                             }
                             simpan_data(row)
                             st.session_state.batch_data.append(row)
+                            
+                            # Hapus cache AI untuk siswa ini
+                            if f"ai_result_{sudah}" in st.session_state:
+                                del st.session_state[f"ai_result_{sudah}"]
+                            
                             st.success(f"✅ Siswa {id_siswa} tersimpan!")
                             st.rerun()
                         except Exception as e:
