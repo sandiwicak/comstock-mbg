@@ -7,11 +7,13 @@ import json
 
 
 def get_gemini_key():
-    """Ambil API key Gemini, gabung dari 2 bagian."""
+    """Gabung API key Gemini dari 4 bagian."""
     try:
-        part1 = st.secrets.get("GEMINI_KEY_PART1", "")
-        part2 = st.secrets.get("GEMINI_KEY_PART2", "")
-        return part1 + part2
+        p1 = st.secrets.get("GEMINI_P1", "")
+        p2 = st.secrets.get("GEMINI_P2", "")
+        p3 = st.secrets.get("GEMINI_P3", "")
+        p4 = st.secrets.get("GEMINI_P4", "")
+        return p1 + p2 + p3 + p4
     except Exception:
         return ""
 
