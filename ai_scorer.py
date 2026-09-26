@@ -27,9 +27,23 @@ def prediksi_skor_dari_foto(image_bytes):
 
         prompt = """
         Anda ahli gizi menganalisa foto tray makanan MBG Indonesia.
-        Tentukan skor Comstock 0-5 untuk NASI, SAYUR, LAUK:
-        0 = Habis total, 1 = Tersisa 1/4, 2 = Tersisa 1/2,
-        3 = Tersisa 3/4, 4 = Hampir utuh, 5 = Utuh.
+
+        Tray kompartemen:
+        - Kiri atas: SAYUR
+        - Kiri bawah: LAUK
+        - Kanan atas: NASI
+        - Bawah: BUAH
+
+        Fokus pada NASI, SAYUR, dan LAUK.
+
+        Tentukan skor Comstock 0-5:
+        0 = Habis total (0% sisa)
+        1 = Tersisa 1/4 porsi (25% sisa)
+        2 = Tersisa 1/2 porsi (50% sisa)
+        3 = Tersisa 3/4 porsi (75% sisa)
+        4 = Hampir utuh (95% sisa)
+        5 = Utuh (100% sisa)
+
         Jawab HANYA JSON:
         {"nasi": 0, "sayur": 0, "lauk": 0, "confidence": 0.0, "alasan": "..."}
         """
@@ -46,18 +60,19 @@ def prediksi_skor_dari_foto(image_bytes):
                         {
                             "type": "image_url",
                             "image_url": {
-                                "url": f"data:image/jpeg;base64,{img_b64}"
+                                "url": "data:image/jpeg;base64," + img_b64
                             }
                         }
                     ]
                 }
             ],
-            "temperature": 0.1
+            "temperature": 0.1,
+            "max_tokens": 500
         }
 
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}"
+            "Authorization": "Bearer " + api_key
         }
 
         st.info("Mengirim foto ke Groq...")
