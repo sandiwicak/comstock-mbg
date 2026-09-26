@@ -1,4 +1,4 @@
-"""Comstock Digital MBG - Aplikasi Utama (tanpa AI, tanpa keterangan)."""
+"""Comstock Digital MBG - Aplikasi Utama."""
 import streamlit as st
 import pandas as pd
 import time
@@ -299,9 +299,17 @@ if st.session_state.halaman == "upload":
                         key=f"lauk_{i}_{st.session_state.uploader_version}"
                     )
                 
+                # KETERANGAN
+                ket_val = st.text_input(
+                    "Keterangan",
+                    value=st.session_state.skor_manual.get(f"ket_{i}", ""),
+                    key=f"ket_{i}_{st.session_state.uploader_version}"
+                )
+                
                 st.session_state.skor_manual[f"nasi_{i}"] = nasi_val
                 st.session_state.skor_manual[f"sayur_{i}"] = sayur_val
                 st.session_state.skor_manual[f"lauk_{i}"] = lauk_val
+                st.session_state.skor_manual[f"ket_{i}"] = ket_val
         
         st.markdown("---")
         
@@ -321,6 +329,7 @@ if st.session_state.halaman == "upload":
                         nasi_val = st.session_state.skor_manual.get(f"nasi_{i}", 0)
                         sayur_val = st.session_state.skor_manual.get(f"sayur_{i}", 0)
                         lauk_val = st.session_state.skor_manual.get(f"lauk_{i}", 0)
+                        ket_val = st.session_state.skor_manual.get(f"ket_{i}", "")
                         
                         filename = f"{user['kode_sekolah']}_{tanggal_upload}_{i+1:03d}_{foto.name}"
                         link_foto = upload_foto(
@@ -358,7 +367,7 @@ if st.session_state.halaman == "upload":
                             "Total Awal (g)": total_awal, "Total Sisa (g)": round(total_sisa,1),
                             "Harga Satuan (Rp)": harga_upload,
                             "Economic Loss (Rp)": round(el,0),
-                            "Keterangan": "",
+                            "Keterangan": ket_val,
                             "Link Foto Sebelum": "",
                             "Link Foto Sesudah": link_foto,
                         }
