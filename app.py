@@ -11,7 +11,6 @@ from comstock_utils import (
 from gsheet_helper import simpan_data, ambil_semua_data
 from gdrive_helper import upload_foto
 from ai_scorer import prediksi_skor_dari_foto
-from auth import cek_login, login_google, logout
 
 
 st.set_page_config(
@@ -184,32 +183,44 @@ st.markdown("""
 
 # ============ SESSION STATE ============
 if "halaman" not in st.session_state: st.session_state.halaman = "upload"
-if "user" not in st.session_state: st.session_state.user = None
 if "uploader_version" not in st.session_state: st.session_state.uploader_version = 0
+if "kode_sekolah" not in st.session_state: st.session_state.kode_sekolah = "SDN01-LB"
+if "nama_enum" not in st.session_state: st.session_state.nama_enum = "Enumerator"
 
-# Cek login
-user = cek_login()
-if not user:
-    st.markdown("""
-    <div class="main-header">
-        <h1>🌿 COMSTOCK DIGITAL</h1>
-        <p>Makanan Bergizi Gratis</p>
-    </div>
-    """, unsafe_allow_html=True)
-    login_google()
-    st.stop()
+# User dari session state
+user = {
+    "nama": st.session_state.nama_enum,
+    "kode_sekolah": st.session_state.kode_sekolah,
+    "email": "-"
+}
 
-# Sidebar
+# ============ SIDEBAR ============
 with st.sidebar:
-    st.markdown(f"### 👋 Halo, {user['nama']}")
-    st.caption(f"🏫 {SEKOLAH_LIST.get(user['kode_sekolah'], user['kode_sekolah'])}")
+    st.markdown("### 🏫 Pilih Sekolah")
+    
+    sekolah_options = list(SEKOLAH_LIST.keys())
+    pilihan = st.selectbox(
+        "Sekolah",
+        options=sekolah_options,
+        format_func=lambda x: SEKOLAH_LIST[x],
+        key="pilih_sekolah_sidebar",
+        label_visibility="collapsed"
+    )
+    st.session_state.kode_sekolah = pilihan
+    user["kode_sekolah"] = pilihan
+    
     st.markdown("---")
+    
+    nama_input = st.text_input("Nama Anda (opsional)", value=st.session_state.nama_enum, key="nama_enum_sidebar")
+    st.session_state.nama_enum = nama_input if nama_input else "Enumerator"
+    user["nama"] = st.session_state.nama_enum
+    
+    st.markdown("---")
+    
     if st.button("📸 Upload Foto"): st.session_state.halaman = "upload"; st.rerun()
     if st.button("📊 Dashboard"): st.session_state.halaman = "dashboard"; st.rerun()
-    st.markdown("---")
-    if st.button("🚪 Logout"): logout()
 
-# Header
+# ============ HEADER ============
 st.markdown(f"""
 <div class="main-header">
     <h1>🌿 COMSTOCK DIGITAL</h1>
@@ -258,7 +269,7 @@ if st.session_state.halaman == "upload":
                 st.image(f, caption=f.name[:12], use_container_width=True)
         
         st.markdown("---")
-        st.info(f"⏱️ Estimasi waktu proses: ~{len(foto_list) * 30} detik (retry agresif). Jangan tutup browser.")
+        st.info(f"⏱️ Estimasi waktu proses: ~{len(foto_list) * 15} detik. Jangan tutup browser.")
         
         if st.button("🚀 Proses Semua Foto dengan AI"):
             progress_bar = st.progress(0)
@@ -302,7 +313,7 @@ if st.session_state.halaman == "upload":
                 progress_bar.progress((idx + 1) / len(foto_list))
                 
                 if idx < len(foto_list) - 1:
-                    time.sleep(3)
+                    time.sleep(1)
             
             if gagal_count > 0:
                 status_text.warning(f"⚠️ Selesai. {gagal_count} foto gagal dianalisa AI (isi manual).")
