@@ -1,9 +1,10 @@
-"""AI Scorer - Gemini 2.0 Flash via REST API."""
-import requests
-import base64
-import json
+"""AI Scorer - Gemini pakai google-genai SDK resmi."""
 import os
+import json
 import streamlit as st
+from google import genai
+from PIL import Image
+from io import BytesIO
 
 
 def get_gemini_key():
@@ -23,76 +24,25 @@ def prediksi_skor_dari_foto(image_bytes):
             st.error("GEMINI key tidak ada di credentials.json")
             return None
 
-        img_b64 = base64.b64encode(image_bytes).decode("utf-8")
+        client = genai.Client(api_key=api_key)
+        img = Image.open(BytesIO(image_bytes))
 
         prompt = """
         Anda ahli gizi menganalisa foto tray makanan MBG Indonesia.
-
-        Tray kompartemen:
-        - Kiri atas: SAYUR
-        - Kiri bawah: LAUK
-        - Kanan atas: NASI
-        - Bawah: BUAH
-
-        Fokus pada NASI, SAYUR, dan LAUK.
-
-        Tentukan skor Comstock 0-5 untuk setiap komponen:
-        - 0 = Habis total (0% sisa)
-        - 1 = Tersisa 1/4 porsi (25% sisa)
-        - 2 = Tersisa 1/2 porsi (50% sisa)
-        - 3 = Tersisa 3/4 porsi (75% sisa)
-        - 4 = Hampir utuh (95% sisa)
-        - 5 = Utuh (100% sisa)
-
-        Jawab HANYA dalam format JSON:
-        {
-            "nasi": 0,
-            "sayur": 0,
-            "lauk": 0,
-            "confidence": 0.0,
-            "alasan": "penjelasan"
-        }
+        Tentukan skor Comstock 0-5 untuk NASI, SAYUR, LAUK:
+        0 = Habis total, 1 = Tersisa 1/4, 2 = Tersisa 1/2,
+        3 = Tersisa 3/4, 4 = Hampir utuh, 5 = Utuh
+        Jawab HANYA JSON: {"nasi": 0, "sayur": 0, "lauk": 0, "confidence": 0.0, "alasan": "..."}
         """
 
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+        st.info("Mengirim foto ke Gemini...")
 
-        headers = {
-            "Content-Type": "application/json",
-            "x-goog-api-key": api_key
-        }
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[prompt, img]
+        )
 
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt},
-                        {
-                            "inline_data": {
-                                "mime_type": "image/jpeg",
-                                "data": img_b64
-                            }
-                        }
-                    ]
-                }
-            ]
-        }
-
-        st.info("Mengirim foto ke Gemini 2.0 Flash...")
-
-        response = requests.post(url, json=payload, headers=headers, timeout=30)
-
-        st.info("HTTP Status = " + str(response.status_code))
-
-        if response.status_code != 200:
-            st.error("Error dari Google: " + str(response.status_code))
-            st.error("Detail: " + response.text[:500])
-            return None
-
-        data = response.json()
-
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-        text = text.strip()
-
+        text = response.text.strip()
         if "```" in text:
             text = text.split("```")[1]
             if text.startswith("json"):
