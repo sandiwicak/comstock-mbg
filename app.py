@@ -34,13 +34,11 @@ st.markdown("""
         color: #1a1a1a;
     }
     
-    /* SEMUA TEXT HITAM */
     .stApp p, .stApp span, .stApp div, .stApp label,
     .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6 {
         color: #1a1a1a;
     }
     
-    /* HEADER */
     .main-header {
         background: linear-gradient(135deg, #efd48a 0%, #f6e3b4 100%);
         border: 2px solid #c99a3a;
@@ -65,7 +63,6 @@ st.markdown("""
         font-weight: 600; 
     }
     
-    /* CARD */
     .card { 
         background: #ffffff; 
         border: 2px solid #c99a3a; 
@@ -87,7 +84,6 @@ st.markdown("""
         display: inline-block; 
     }
     
-    /* METRIC */
     .metric-card { 
         background: linear-gradient(135deg, #c99a3a 0%, #8a5a2b 100%); 
         border-radius: 14px; 
@@ -115,7 +111,6 @@ st.markdown("""
         margin: 0.3rem 0; 
     }
     
-    /* BUTTON */
     .stButton > button { 
         background: #c99a3a !important; 
         color: #ffffff !important; 
@@ -127,9 +122,12 @@ st.markdown("""
     }
     .stButton > button:hover { 
         background: #8a5a2b !important; 
+        color: #ffffff !important;
+    }
+    .stButton > button p {
+        color: #ffffff !important;
     }
     
-    /* SEMUA INPUT - HITAM BG, PUTIH TEXT */
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input,
     .stTextArea > div > div > textarea,
@@ -145,11 +143,22 @@ st.markdown("""
         color: #888888 !important;
     }
     
-    /* SELECTBOX */
+    .stNumberInput button {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    .stNumberInput button svg {
+        fill: #ffffff !important;
+    }
+    
     .stSelectbox > div > div,
-    .stSelectbox [data-baseweb="select"] > div { 
+    .stSelectbox [data-baseweb="select"] > div,
+    .stSelectbox [data-baseweb="select"] span { 
         background-color: #1a1a1a !important; 
         color: #ffffff !important; 
+    }
+    .stSelectbox [data-baseweb="select"] > div {
         border: 2px solid #1a1a1a !important; 
         border-radius: 10px !important; 
     }
@@ -172,7 +181,6 @@ st.markdown("""
         color: #1a1a1a !important; 
     }
     
-    /* LABELS HITAM */
     .stTextInput label, 
     .stNumberInput label, 
     .stSelectbox label, 
@@ -183,58 +191,88 @@ st.markdown("""
         font-weight: 600 !important; 
     }
     
-    /* CAPTION HITAM */
-    .stCaption, [data-testid="stCaptionContainer"] {
+    .stCaption, [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {
         color: #1a1a1a !important;
         font-weight: 500 !important;
     }
     
-    /* MARKDOWN HITAM */
     .stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown span, .stMarkdown div {
         color: #1a1a1a !important;
     }
     
-    /* FILE UPLOADER */
     .stFileUploader > div > div { 
         border: 2px dashed #c99a3a !important; 
         border-radius: 12px !important; 
         background: #f6e3b4 !important; 
     }
+    
     .stFileUploader > div > div > div,
     .stFileUploader > div > div > div > div,
-    .stFileUploader > div > div > small {
+    .stFileUploader > div > div small,
+    .stFileUploader small,
+    .stFileUploader p {
         color: #1a1a1a !important;
     }
+    
     .stFileUploader button {
         background-color: #c99a3a !important;
         color: #ffffff !important;
         border-radius: 10px !important;
         border: none !important;
     }
+    .stFileUploader button p {
+        color: #ffffff !important;
+    }
     
-    /* ALERT - teks hitam */
-    .stAlert, .stAlert * {
+    .stFileUploader [data-testid="stFileUploaderFileName"],
+    .stFileUploader [data-testid="stFileUploaderFileName"] *,
+    .stFileUploader [data-testid="stFileUploaderFile"],
+    .stFileUploader [data-testid="stFileUploaderFile"] *,
+    .stFileUploader [data-testid="stUploadedFile"],
+    .stFileUploader [data-testid="stUploadedFile"] *,
+    .stFileUploader ul,
+    .stFileUploader ul li,
+    .stFileUploader ul li * {
+        color: #ffffff !important;
+    }
+    
+    .stFileUploader [data-testid="stFileUploaderDeleteBtn"] svg,
+    .stFileUploader button[title="Remove file"] svg,
+    .stFileUploader svg {
+        fill: #ffffff !important;
+        color: #ffffff !important;
+    }
+    
+    .stFileUploader [data-testid="stUploadedFile"],
+    .stFileUploader [data-testid="stFileUploaderFile"] {
+        background-color: #1a1a1a !important;
+        border-radius: 8px !important;
+    }
+    
+    .stAlert, .stAlert *, .stAlert p {
         color: #1a1a1a !important;
     }
     .stAlert {
         border-radius: 12px !important;
     }
     
-    /* EXPANDER */
-    .streamlit-expanderHeader, 
-    .streamlit-expanderHeader *,
-    [data-testid="stExpander"] summary,
-    [data-testid="stExpander"] summary * {
-        color: #1a1a1a !important;
-        font-weight: 600 !important;
-    }
     [data-testid="stExpander"] {
         border: 2px solid #c99a3a !important;
         border-radius: 12px !important;
         background: #ffffff !important;
     }
+    [data-testid="stExpander"] summary,
+    [data-testid="stExpander"] summary *,
+    [data-testid="stExpander"] p,
+    [data-testid="stExpander"] div,
+    [data-testid="stExpander"] span,
+    [data-testid="stExpander"] label {
+        color: #1a1a1a !important;
+    }
+    [data-testid="stExpander"] summary {
+        font-weight: 600 !important;
+    }
     
-    /* SIDEBAR */
     section[data-testid="stSidebar"] { 
         background: #efd48a; 
         border-right: 2px solid #c99a3a; 
@@ -249,17 +287,20 @@ st.markdown("""
         border-radius: 12px; 
         margin-bottom: 0.5rem; 
     }
+    section[data-testid="stSidebar"] .stButton > button p {
+        color: #1a1a1a !important;
+    }
     section[data-testid="stSidebar"] .stButton > button:hover {
         background: #8a5a2b !important;
+    }
+    section[data-testid="stSidebar"] .stButton > button:hover p {
         color: #ffffff !important;
     }
     
-    /* PROGRESS BAR */
     .stProgress > div > div > div > div { 
         background: #c99a3a !important; 
     }
     
-    /* METRIC NATIVE */
     [data-testid="stMetricValue"] {
         color: #1a1a1a !important;
         font-weight: 800 !important;
@@ -269,9 +310,12 @@ st.markdown("""
         font-weight: 600 !important;
     }
     
-    /* DATAFRAME */
     .stDataFrame, .stDataFrame * {
         color: #1a1a1a;
+    }
+    
+    .stSpinner > div {
+        color: #1a1a1a !important;
     }
     
     #MainMenu, footer, header {visibility: hidden;}
@@ -323,14 +367,12 @@ if st.session_state.halaman == "upload":
     st.markdown('<div class="section-title">📸 Upload Foto Sisa</div>', unsafe_allow_html=True)
     st.caption("Upload foto sisa makanan. AI akan menganalisa otomatis. Tinggal koreksi dan simpan.")
     
-    # Setup minimal
     col1, col2 = st.columns(2)
     with col1:
         tanggal_upload = st.date_input("Tanggal", datetime.now(), key="upload_tanggal")
     with col2:
         harga_upload = st.number_input("Harga Porsi (Rp)", 0.0, 100000.0, 15000.0, key="upload_harga")
     
-    # Berat awal default
     with st.expander("⚖️ Berat Awal Referensi (klik untuk ubah)"):
         col1, col2, col3 = st.columns(3)
         with col1: ba_nasi = st.number_input("Nasi (g)", 0.0, 500.0, 136.0, key="ba_nasi")
@@ -352,7 +394,6 @@ if st.session_state.halaman == "upload":
     if foto_list:
         st.success(f"✅ {len(foto_list)} foto terpilih")
         
-        # Preview grid
         cols = st.columns(min(len(foto_list), 4))
         for i, f in enumerate(foto_list):
             with cols[i % 4]:
@@ -360,12 +401,12 @@ if st.session_state.halaman == "upload":
         
         st.markdown("---")
         
-        # Tombol proses AI
         if st.button("🚀 Proses Semua Foto dengan AI"):
             progress_bar = st.progress(0)
             status_text = st.empty()
             
             hasil = []
+            gagal_count = 0
             
             for idx, foto in enumerate(foto_list):
                 status_text.info(f"⏳ Menganalisa foto {idx+1}/{len(foto_list)}: {foto.name}")
@@ -375,9 +416,7 @@ if st.session_state.halaman == "upload":
                     
                     if skor_ai:
                         hasil.append({
-                            "idx": idx,
-                            "file": foto,
-                            "nama": foto.name,
+                            "idx": idx, "file": foto, "nama": foto.name,
                             "nasi": int(skor_ai.get("nasi", 0)),
                             "sayur": int(skor_ai.get("sayur", 0)),
                             "lauk": int(skor_ai.get("lauk", 0)),
@@ -385,31 +424,32 @@ if st.session_state.halaman == "upload":
                             "error": None
                         })
                     else:
+                        gagal_count += 1
                         hasil.append({
-                            "idx": idx,
-                            "file": foto,
-                            "nama": foto.name,
+                            "idx": idx, "file": foto, "nama": foto.name,
                             "nasi": 0, "sayur": 0, "lauk": 0,
-                            "alasan": "AI tidak tersedia",
+                            "alasan": "AI tidak tersedia, silakan isi manual",
                             "error": None
                         })
                 except Exception as e:
+                    gagal_count += 1
                     hasil.append({
-                        "idx": idx,
-                        "file": foto,
-                        "nama": foto.name,
+                        "idx": idx, "file": foto, "nama": foto.name,
                         "nasi": 0, "sayur": 0, "lauk": 0,
-                        "alasan": "",
+                        "alasan": f"Error: {str(e)[:50]}",
                         "error": str(e)
                     })
                 
                 progress_bar.progress((idx + 1) / len(foto_list))
             
-            status_text.success(f"✅ Analisa selesai! Silakan koreksi di bawah.")
+            if gagal_count > 0:
+                status_text.warning(f"⚠️ Selesai. {gagal_count} foto gagal dianalisa AI (isi manual).")
+            else:
+                status_text.success(f"✅ Analisa selesai! Silakan koreksi di bawah.")
+            
             st.session_state["hasil_upload"] = hasil
             st.rerun()
     
-    # Tampilkan hasil analisa
     if "hasil_upload" in st.session_state and st.session_state["hasil_upload"]:
         hasil = st.session_state["hasil_upload"]
         
@@ -417,7 +457,6 @@ if st.session_state.halaman == "upload":
         st.markdown("### ✏️ Koreksi Skor (kalau AI salah)")
         st.caption("Ubah skor di dropdown kalau AI salah. Kalau sudah benar, langsung klik Simpan Semua.")
         
-        # Tampilkan tiap foto dengan dropdown
         for i, h in enumerate(hasil):
             with st.expander(f"📷 {h['nama']} — Nasi:{h['nasi']} Sayur:{h['sayur']} Lauk:{h['lauk']}", expanded=False):
                 col1, col2 = st.columns([1, 2])
@@ -440,7 +479,6 @@ if st.session_state.halaman == "upload":
         
         st.markdown("---")
         
-        # Tombol simpan semua
         col1, col2 = st.columns(2)
         with col1:
             if st.button("💾 Simpan Semua"):
@@ -454,7 +492,6 @@ if st.session_state.halaman == "upload":
                     status_text.info(f"⏳ Menyimpan {i+1}/{len(st.session_state['hasil_upload'])}: {h['nama']}")
                     
                     try:
-                        # Upload foto ke Drive
                         filename = f"{user['kode_sekolah']}_{tanggal_upload}_{i+1:03d}_{h['nama']}"
                         link_foto = upload_foto(
                             h['file'].getvalue(),
@@ -462,7 +499,6 @@ if st.session_state.halaman == "upload":
                             subfolder=f"{user['kode_sekolah']}/{tanggal_upload}"
                         )
                         
-                        # Hitung
                         total_awal = ba_nasi + ba_sayur + ba_lauk
                         pn = skor_ke_persentase_sisa(h['nasi'])
                         ps = skor_ke_persentase_sisa(h['sayur'])
@@ -504,7 +540,6 @@ if st.session_state.halaman == "upload":
                     progress_bar.progress((i + 1) / len(st.session_state["hasil_upload"]))
                 
                 status_text.success(f"✅ Selesai! {sukses} sukses, {gagal} gagal.")
-                st.balloons()
                 
                 del st.session_state["hasil_upload"]
                 
