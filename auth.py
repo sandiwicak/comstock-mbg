@@ -1,14 +1,14 @@
-"""Autentikasi Google OAuth."""
+"""Autentikasi via kode akses sekolah."""
 import streamlit as st
 
+
 def cek_login():
-    """Cek apakah user sudah login. Return dict user atau None."""
     if "user" in st.session_state and st.session_state.user:
         return st.session_state.user
     return None
 
+
 def login_google():
-    """Tombol login Google (simulasi dengan kode akses untuk kecepatan)."""
     st.markdown("### 🔐 Login Enumerator")
     st.info("Masukkan kode akses yang diberikan admin sekolah.")
     
@@ -16,12 +16,10 @@ def login_google():
     nama = st.text_input("Nama Anda", placeholder="Nama lengkap")
     
     if st.button("🚀 Masuk"):
-        # Format kode: KODESEKOLAH-TAHUN (misal SDN01-LB-2026)
         if not kode or not nama:
             st.error("Kode akses dan nama wajib diisi!")
             return None
         
-        # Validasi kode (bisa diperluas nanti ke database)
         kode_valid = {
             "SDN01-2026": "SDN01-LB",
             "SDN02-2026": "SDN02-LB",
@@ -48,6 +46,7 @@ def login_google():
     st.markdown("---")
     st.caption("💡 Kode akses dibagikan admin. Contoh: SDN01-2026 untuk SDN 1 Labuhan Badas.")
     return None
+
 
 def logout():
     st.session_state.user = None
