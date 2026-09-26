@@ -11,6 +11,21 @@ def prediksi_skor_dari_foto(image_bytes):
     Return: dict {nasi, sayur, lauk, confidence, alasan} atau None
     """
     try:
+        # ============ DEBUG: Tampilkan isi Secrets ============
+        try:
+            all_keys = list(st.secrets.keys())
+            st.write(f"🔍 Debug: Secrets keys = {all_keys}")
+            
+            if "GEMINI_API_KEY" in st.secrets:
+                key_val = st.secrets["GEMINI_API_KEY"]
+                st.write(f"🔍 Debug: GEMINI_API_KEY ADA ✅ (panjang: {len(key_val)} char)")
+                st.write(f"🔍 Debug: 10 char pertama: {key_val[:10]}...")
+            else:
+                st.write("🔍 Debug: GEMINI_API_KEY TIDAK ADA ❌")
+        except Exception as e_debug:
+            st.write(f"🔍 Debug error: {e_debug}")
+        # =====================================================
+        
         # Ambil API key dari secrets
         api_key = st.secrets.get("GEMINI_API_KEY", "")
         if not api_key:
