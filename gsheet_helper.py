@@ -1,9 +1,7 @@
 """Koneksi & operasi Google Sheets."""
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import streamlit as st
 import os
-import base64
 import json
 
 SHEET_NAME = "Data_Comstock_MBG"
@@ -21,23 +19,12 @@ HEADERS = [
 
 
 def get_credentials_dict():
-    """Ambil credentials dari Secrets atau file."""
-    try:
-        if "gcp_service_account" in st.secrets:
-            creds_dict = dict(st.secrets["gcp_service_account"])
-            
-            # Decode private_key dari base64 (kalau di-encode)
-            if "private_key_b64" in creds_dict:
-                creds_dict["private_key"] = base64.b64decode(
-                    creds_dict["private_key_b64"]
-                ).decode("utf-8")
-                del creds_dict["private_key_b64"]
-            
-            return creds_dict
-    except Exception as e:
-        st.write(f"Debug Secrets error: {e}")
+    """Baca credentials dari config.json."""
+    if os.path.exists("config.json"):
+        with open("config.json") as f:
+            return json.load(f)
     
-    # Fallback ke file lokal
+    # Fallback ke credentials.json (untuk lokal)
     if os.path.exists("credentials.json"):
         with open("credentials.json") as f:
             return json.load(f)
@@ -53,7 +40,7 @@ def get_client():
     
     creds_dict = get_credentials_dict()
     if creds_dict is None:
-        raise Exception("Credentials tidak ditemukan.")
+        raise Exception("config.json tidak ditemukan di repo.")
     
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     return gspread.authorize(creds)
