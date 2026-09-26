@@ -25,16 +25,7 @@ def get_credentials_dict():
         if "gcp_service_account" in st.secrets:
             creds_dict = dict(st.secrets["gcp_service_account"])
 
-            # Kalau private_key disimpan dalam beberapa bagian (PK1, PK2, ...)
-            if "PK1" in creds_dict:
-                pk = ""
-                i = 1
-                while f"PK{i}" in creds_dict:
-                    pk += creds_dict.pop(f"PK{i}")
-                    i += 1
-                creds_dict["private_key"] = pk
-
-            # Kalau private_key di-encode base64
+            # Decode private_key dari base64
             if "private_key_b64" in creds_dict:
                 creds_dict["private_key"] = base64.b64decode(
                     creds_dict["private_key_b64"]
