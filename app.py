@@ -178,15 +178,13 @@ st.markdown("""
         color: #1a1a1a !important; 
     }
     
-    /* LABELS - HITAM */
+    /* LABELS */
     .stTextInput label, 
     .stNumberInput label, 
     .stSelectbox label, 
     .stTextArea label, 
     .stFileUploader label, 
-    .stDateInput label,
-    .stCheckbox label,
-    .stRadio label { 
+    .stDateInput label { 
         color: #1a1a1a !important; 
         font-weight: 600 !important; 
     }
@@ -197,7 +195,7 @@ st.markdown("""
         font-weight: 500 !important;
     }
     
-    /* MARKDOWN TEXT */
+    /* MARKDOWN */
     .stMarkdown p, .stMarkdown li, .stMarkdown span {
         color: #1a1a1a;
     }
@@ -218,7 +216,7 @@ st.markdown("""
         border: none !important;
     }
     
-    /* ALERT BOXES */
+    /* ALERT */
     .stAlert {
         border-radius: 12px !important;
     }
@@ -251,7 +249,7 @@ st.markdown("""
         background: #c99a3a !important; 
     }
     
-    /* METRIC NATIVE STREAMLIT */
+    /* METRIC NATIVE */
     [data-testid="stMetricValue"] {
         color: #1a1a1a !important;
         font-weight: 800 !important;
@@ -261,7 +259,6 @@ st.markdown("""
         font-weight: 600 !important;
     }
     
-    /* HIDE STREAMLIT BRANDING */
     #MainMenu, footer, header {visibility: hidden;}
     
     @media (max-width: 768px) { 
@@ -371,16 +368,16 @@ if st.session_state.halaman == "input":
             st.markdown("**📷 Foto Sisa Makanan Siswa Ini**")
             foto_sisa = st.file_uploader("Upload foto sisa", type=["jpg","jpeg","png"], key=f"fs_{sudah}")
             
-            # Default skor = 0
+            # Nilai default
             default_nasi = 0
             default_sayur = 0
             default_lauk = 0
             ai_alasan = ""
+            ai_version = "0_0_0_0"  # versi AI, untuk reset dropdown
             
             if foto_sisa:
                 st.image(foto_sisa, caption="Sisa Makanan", use_container_width=True)
                 
-                # Cache hasil AI biar tidak panggil ulang setiap rerun
                 cache_key = f"ai_result_{sudah}"
                 
                 if cache_key not in st.session_state:
@@ -391,13 +388,15 @@ if st.session_state.halaman == "input":
                     skor_ai = st.session_state[cache_key]
                 
                 if skor_ai:
-                    default_nasi = skor_ai.get("nasi", 0)
-                    default_sayur = skor_ai.get("sayur", 0)
-                    default_lauk = skor_ai.get("lauk", 0)
+                    default_nasi = int(skor_ai.get("nasi", 0))
+                    default_sayur = int(skor_ai.get("sayur", 0))
+                    default_lauk = int(skor_ai.get("lauk", 0))
                     ai_alasan = skor_ai.get("alasan", "")
                     
-                    # Tampilkan notifikasi kecil (bukan di luar dropdown)
-                    st.success(f"🤖 AI sudah mengisi skor otomatis. Silakan verifikasi/koreksi.")
+                    # ai_version unik → memaksa dropdown reset
+                    ai_version = f"{default_nasi}_{default_sayur}_{default_lauk}_{len(ai_alasan)}"
+                    
+                    st.success("🤖 AI sudah mengisi skor otomatis. Silakan verifikasi/koreksi.")
                     if ai_alasan:
                         st.caption(f"💬 {ai_alasan}")
                 else:
@@ -407,13 +406,25 @@ if st.session_state.halaman == "input":
             
             col1, col2, col3 = st.columns(3)
             with col1:
-                sn = st.selectbox("Nasi", [0,1,2,3,4,5], index=default_nasi, key=f"sn_{sudah}")
+                sn = st.selectbox(
+                    "Nasi", [0,1,2,3,4,5], 
+                    index=default_nasi, 
+                    key=f"sn_{sudah}_{ai_version}"
+                )
                 st.caption(KETERANGAN_SKOR[sn])
             with col2:
-                ss = st.selectbox("Sayur", [0,1,2,3,4,5], index=default_sayur, key=f"ss_{sudah}")
+                ss = st.selectbox(
+                    "Sayur", [0,1,2,3,4,5], 
+                    index=default_sayur, 
+                    key=f"ss_{sudah}_{ai_version}"
+                )
                 st.caption(KETERANGAN_SKOR[ss])
             with col3:
-                sl = st.selectbox("Lauk", [0,1,2,3,4,5], index=default_lauk, key=f"sl_{sudah}")
+                sl = st.selectbox(
+                    "Lauk", [0,1,2,3,4,5], 
+                    index=default_lauk, 
+                    key=f"sl_{sudah}_{ai_version}"
+                )
                 st.caption(KETERANGAN_SKOR[sl])
             
             keterangan = st.text_input("Keterangan (opsional)", key=f"ket_{sudah}")
@@ -475,7 +486,6 @@ if st.session_state.halaman == "input":
                             simpan_data(row)
                             st.session_state.batch_data.append(row)
                             
-                            # Hapus cache AI untuk siswa ini
                             if f"ai_result_{sudah}" in st.session_state:
                                 del st.session_state[f"ai_result_{sudah}"]
                             
