@@ -3,6 +3,8 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
 import os
+import base64
+import json
 
 SHEET_NAME = "Data_Comstock_MBG"
 WORKSHEET_NAME = "Data"
@@ -18,26 +20,43 @@ HEADERS = [
 ]
 
 
+def get_credentials_dict():
+    """Ambil credentials dari Secrets atau file."""
+    try:
+        if "gcp_service_account" in st.secrets:
+            creds_dict = dict(st.secrets["gcp_service_account"])
+            
+            # Decode private_key dari base64 (kalau di-encode)
+            if "private_key_b64" in creds_dict:
+                creds_dict["private_key"] = base64.b64decode(
+                    creds_dict["private_key_b64"]
+                ).decode("utf-8")
+                del creds_dict["private_key_b64"]
+            
+            return creds_dict
+    except Exception as e:
+        st.write(f"Debug Secrets error: {e}")
+    
+    # Fallback ke file lokal
+    if os.path.exists("credentials.json"):
+        with open("credentials.json") as f:
+            return json.load(f)
+    
+    return None
+
+
 def get_client():
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive"
     ]
     
-    # PRIORITAS 1: Baca dari Streamlit Secrets (untuk cloud)
-    try:
-        creds_dict = dict(st.secrets["gcp_service_account"])
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        return gspread.authorize(creds)
-    except Exception:
-        pass
+    creds_dict = get_credentials_dict()
+    if creds_dict is None:
+        raise Exception("Credentials tidak ditemukan.")
     
-    # PRIORITAS 2: Baca dari file credentials.json (untuk lokal)
-    if os.path.exists("credentials.json"):
-        creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
-        return gspread.authorize(creds)
-    
-    raise Exception("Credentials tidak ditemukan. Set Secrets di Streamlit Cloud.")
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    return gspread.authorize(creds)
 
 
 def get_or_create_worksheet():
