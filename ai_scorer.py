@@ -1,4 +1,4 @@
-"""AI Scorer - Groq Vision API."""
+"""AI Scorer - Groq Vision API dengan rotasi API key."""
 import requests
 import base64
 import json
@@ -8,17 +8,35 @@ from PIL import Image
 from io import BytesIO
 import streamlit as st
 
+from gsheet_helper import ambil_api_keys
 
-def get_groq_key():
-    if "groq_api_key_input" in st.session_state and st.session_state.groq_api_key_input:
-        return st.session_state.groq_api_key_input.strip()
-    
-    if os.path.exists("config.json"):
-        with open("config.json") as f:
-            config = json.load(f)
-            return config.get("groq_api_key", "")
-    
-    return ""
+
+# Cache API keys per session
+def get_api_keys():
+    """Ambil list API key Groq dari sheet APIKey."""
+    if "api_keys_cache" not in st.session_state:
+        st.session_state.api_keys_cache = ambil_api_keys()
+        st.session_state.api_key_index = 0
+    return st.session_state.api_keys_cache
+
+
+def get_current_key():
+    """Ambil API key saat ini."""
+    keys = get_api_keys()
+    if not keys:
+        return None
+    idx = st.session_state.get("api_key_index", 0) % len(keys)
+    return keys[idx]
+
+
+def rotate_key():
+    """Pindah ke API key berikutnya."""
+    keys = get_api_keys()
+    if not keys:
+        return False
+    st.session_state.api_key_index = (st.session_state.get("api_key_index", 0) + 1) % len(keys)
+    print(f"[AI] Rotasi ke key index {st.session_state.api_key_index}")
+    return True
 
 
 def compress_image(image_bytes, max_size=640, quality=70):
@@ -38,9 +56,11 @@ def compress_image(image_bytes, max_size=640, quality=70):
 
 
 def prediksi_skor_dari_foto(image_bytes):
+    """Coba dengan rotasi API key otomatis."""
     try:
-        api_key = get_groq_key()
-        if not api_key:
+        keys = get_api_keys()
+        if not keys:
+            print("[AI] Tidak ada API key di sheet APIKey")
             return None
 
         image_bytes = compress_image(image_bytes)
@@ -55,19 +75,24 @@ def prediksi_skor_dari_foto(image_bytes):
         """
 
         url = "https://api.groq.com/openai/v1/chat/completions"
-
         models = [
             "meta-llama/llama-4-scout-17b-16e-instruct",
             "qwen/qwen3.8-27b",
             "meta-llama/llama-4-maverick-17b-128e-instruct"
         ]
 
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + api_key
-        }
+        # Coba semua API key, semua model
+        total_keys = len(keys)
+        for key_attempt in range(total_keys):
+            api_key = get_current_key()
+            if not api_key:
+                break
 
-        for attempt in range(5):
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + api_key
+            }
+
             for model in models:
                 try:
                     payload = {
@@ -93,25 +118,35 @@ def prediksi_skor_dari_foto(image_bytes):
                             if text.startswith("json"):
                                 text = text[4:]
                         text = text.strip()
+                        print(f"[AI] Sukses dengan key index {st.session_state.api_key_index}, model {model}")
                         return json.loads(text)
 
                     elif response.status_code == 429:
-                        time.sleep(8)
+                        # Rate limit - coba model lain dulu, baru rotasi key
+                        print(f"[AI] 429 rate limit di key {st.session_state.api_key_index}")
+                        time.sleep(2)
                         continue
 
                     elif response.status_code == 401:
-                        return None
+                        # API key invalid - langsung rotasi
+                        print(f"[AI] 401 invalid key di index {st.session_state.api_key_index}")
+                        break  # keluar dari loop model, rotasi key
 
                     else:
-                        time.sleep(3)
+                        time.sleep(1)
                         continue
 
-                except Exception:
+                except Exception as e:
+                    print(f"[AI] Error: {e}")
                     continue
 
-            time.sleep(3)
+            # Setelah coba semua model dengan key ini, rotasi
+            rotate_key()
+            time.sleep(1)
 
+        print("[AI] Semua API key dan model gagal")
         return None
 
-    except Exception:
+    except Exception as e:
+        print(f"[AI] Exception utama: {e}")
         return None
