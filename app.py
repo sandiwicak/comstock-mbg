@@ -131,7 +131,7 @@ st.markdown("""
     /* MARKDOWN */
     .stMarkdown p, .stMarkdown li, .stMarkdown span { color: #1a1a1a; }
     
-        /* EXPANDER HITAM */
+    /* EXPANDER HITAM */
     [data-testid="stExpander"] {
         border: 2px solid #1a1a1a !important;
         border-radius: 12px !important;
@@ -275,7 +275,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ==================== INPUT API KEY DI HALAMAN UTAMA ====================
+# Input API Key di halaman utama
 if not st.session_state.groq_api_key_input:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🔑 Masukkan Groq API Key</div>', unsafe_allow_html=True)
@@ -353,6 +353,9 @@ if st.session_state.halaman == "upload":
             gagal_ai = 0
             error_detail = []
             
+            # Timestamp untuk ID unik
+            timestamp_id = datetime.now().strftime("%H%M%S")
+            
             for i, foto in enumerate(foto_baru):
                 status_text.info(f"⏳ Memproses {i+1}/{len(foto_baru)}: {foto.name}")
                 
@@ -386,6 +389,9 @@ if st.session_state.halaman == "upload":
                     total_sisa = bsn + bss + bsl
                     el = hitung_economic_loss(total_awal, total_sisa, harga_upload)
                     
+                    # ID SISWA UNIK: timestamp + nomor urut
+                    id_siswa_unik = f"{timestamp_id}-{i+1:02d}"
+                    
                     row = {
                         "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         "Tanggal": str(tanggal_upload),
@@ -394,7 +400,7 @@ if st.session_state.halaman == "upload":
                         "Nama Sekolah": SEKOLAH_LIST[user['kode_sekolah']],
                         "Nama Enumerator": user['nama'],
                         "Email Enumerator": user.get('email', '-'),
-                        "ID Siswa": str(len(st.session_state.processed_files) + i + 1),
+                        "ID Siswa": id_siswa_unik,
                         "Nama Foto": foto.name,
                         "Kelas": "-",
                         "Skor Visual Nasi": nasi_val, "Berat Awal Nasi (g)": ba_nasi,
