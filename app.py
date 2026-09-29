@@ -1,4 +1,4 @@
-"""Comstock Digital MBG - Auto Upload + AI + Simpan."""
+"""Comstock Digital MBG - Auto Upload + AI + Simpan (1 per 1)."""
 import streamlit as st
 import pandas as pd
 import time
@@ -212,6 +212,7 @@ if "kode_sekolah" not in st.session_state: st.session_state.kode_sekolah = "SDN0
 if "nama_enum" not in st.session_state: st.session_state.nama_enum = "Enumerator"
 if "uploader_version" not in st.session_state: st.session_state.uploader_version = 0
 if "processed_files" not in st.session_state: st.session_state.processed_files = set()
+if "last_success_index" not in st.session_state: st.session_state.last_success_index = 0
 
 user = {
     "nama": st.session_state.nama_enum,
@@ -258,7 +259,7 @@ st.markdown(f"""
 if st.session_state.halaman == "upload":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📸 Upload Foto Sisa</div>', unsafe_allow_html=True)
-    st.caption("Upload foto → langsung diproses AI + disimpan otomatis.")
+    st.caption("Upload foto → AI cek 1 per 1 → langsung simpan. Kalau gagal, tahu foto ke berapa.")
     
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -291,26 +292,29 @@ if st.session_state.halaman == "upload":
         foto_baru = [f for f in foto_list if f.name not in st.session_state.processed_files]
         
         if foto_baru:
-            st.info(f"🔄 Memproses {len(foto_baru)} foto baru...")
+            st.info(f"🔄 Memproses {len(foto_baru)} foto (1 per 1)...")
             
             progress_bar = st.progress(0)
             status_text = st.empty()
+            log_area = st.empty()
             
             sukses = 0
             gagal = 0
             gagal_ai = 0
             error_detail = []
+            gagal_di = None
             
             timestamp_id = datetime.now().strftime("%H%M%S")
             
             for i, foto in enumerate(foto_baru):
-                status_text.info(f"⏳ Memproses {i+1}/{len(foto_baru)}: {foto.name}")
+                status_text.info(f"⏳ Foto {i+1}/{len(foto_baru)}: {foto.name}")
                 
                 nasi_val = 0
                 sayur_val = 0
                 lauk_val = 0
                 ket_val = ""
                 
+                # === 1. AI cek ===
                 try:
                     skor_ai = prediksi_skor_dari_foto(foto.getvalue())
                     if skor_ai:
@@ -320,61 +324,76 @@ if st.session_state.halaman == "upload":
                         ket_val = skor_ai.get("alasan", "")
                     else:
                         gagal_ai += 1
-                except Exception:
+                except Exception as e:
                     gagal_ai += 1
+                    print(f"[ERROR AI] Foto {i+1}: {e}")
                 
+                # === 2. Hitung ===
+                total_awal = ba_nasi + ba_sayur + ba_lauk
+                pn = skor_ke_persentase_sisa(nasi_val)
+                ps = skor_ke_persentase_sisa(sayur_val)
+                pl = skor_ke_persentase_sisa(lauk_val)
+                bsn = ba_nasi * pn
+                bss = ba_sayur * ps
+                bsl = ba_lauk * pl
+                total_sisa = bsn + bss + bsl
+                el = hitung_economic_loss(total_awal, total_sisa, harga_upload)
+                
+                id_siswa_unik = f"{timestamp_id}-{i+1:02d}"
+                
+                row = {
+                    "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "Tanggal": str(tanggal_upload),
+                    "Hari Ke-": hari_ke,
+                    "Kode Sekolah": user['kode_sekolah'],
+                    "Nama Sekolah": SEKOLAH_LIST[user['kode_sekolah']],
+                    "Nama Enumerator": user['nama'],
+                    "Email Enumerator": user.get('email', '-'),
+                    "ID Siswa": id_siswa_unik,
+                    "Nama Foto": foto.name,
+                    "Kelas": "-",
+                    "Skor Visual Nasi": nasi_val, "Berat Awal Nasi (g)": ba_nasi,
+                    "Berat Sisa Nasi (g)": round(bsn,1), "% Sisa Nasi": round(pn,4),
+                    "Skor Visual Sayur": sayur_val, "Berat Awal Sayur (g)": ba_sayur,
+                    "Berat Sisa Sayur (g)": round(bss,1), "% Sisa Sayur": round(ps,4),
+                    "Skor Visual Lauk": lauk_val, "Berat Awal Lauk (g)": ba_lauk,
+                    "Berat Sisa Lauk (g)": round(bsl,1), "% Sisa Lauk": round(pl,4),
+                    "Total Awal (g)": total_awal, "Total Sisa (g)": round(total_sisa,1),
+                    "Harga Satuan (Rp)": harga_upload,
+                    "Economic Loss (Rp)": round(el,0),
+                    "Keterangan": ket_val,
+                    "Link Foto Sebelum": "",
+                    "Link Foto Sesudah": "",
+                }
+                
+                # === 3. Simpan ke Sheets ===
                 try:
-                    link_foto = ""
-                    
-                    total_awal = ba_nasi + ba_sayur + ba_lauk
-                    pn = skor_ke_persentase_sisa(nasi_val)
-                    ps = skor_ke_persentase_sisa(sayur_val)
-                    pl = skor_ke_persentase_sisa(lauk_val)
-                    bsn = ba_nasi * pn
-                    bss = ba_sayur * ps
-                    bsl = ba_lauk * pl
-                    total_sisa = bsn + bss + bsl
-                    el = hitung_economic_loss(total_awal, total_sisa, harga_upload)
-                    
-                    id_siswa_unik = f"{timestamp_id}-{i+1:02d}"
-                    
-                    row = {
-                        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "Tanggal": str(tanggal_upload),
-                        "Hari Ke-": hari_ke,
-                        "Kode Sekolah": user['kode_sekolah'],
-                        "Nama Sekolah": SEKOLAH_LIST[user['kode_sekolah']],
-                        "Nama Enumerator": user['nama'],
-                        "Email Enumerator": user.get('email', '-'),
-                        "ID Siswa": id_siswa_unik,
-                        "Nama Foto": foto.name,
-                        "Kelas": "-",
-                        "Skor Visual Nasi": nasi_val, "Berat Awal Nasi (g)": ba_nasi,
-                        "Berat Sisa Nasi (g)": round(bsn,1), "% Sisa Nasi": round(pn,4),
-                        "Skor Visual Sayur": sayur_val, "Berat Awal Sayur (g)": ba_sayur,
-                        "Berat Sisa Sayur (g)": round(bss,1), "% Sisa Sayur": round(ps,4),
-                        "Skor Visual Lauk": lauk_val, "Berat Awal Lauk (g)": ba_lauk,
-                        "Berat Sisa Lauk (g)": round(bsl,1), "% Sisa Lauk": round(pl,4),
-                        "Total Awal (g)": total_awal, "Total Sisa (g)": round(total_sisa,1),
-                        "Harga Satuan (Rp)": harga_upload,
-                        "Economic Loss (Rp)": round(el,0),
-                        "Keterangan": ket_val,
-                        "Link Foto Sebelum": "",
-                        "Link Foto Sesudah": link_foto,
-                    }
                     simpan_data(row)
                     sukses += 1
                     st.session_state.processed_files.add(foto.name)
+                    
+                    # Log sukses
+                    log_area.success(f"✅ Foto {i+1} ({foto.name}) — tersimpan!")
                 except Exception as e:
                     gagal += 1
                     error_detail.append(f"Foto {i+1} ({foto.name}): {type(e).__name__}: {str(e)[:100]}")
+                    gagal_di = i + 1
+                    log_area.error(f"❌ Foto {i+1} ({foto.name}) GAGAL: {str(e)[:80]}")
+                    
+                    # STOP kalau gagal simpan
+                    st.error(f"🛑 Proses berhenti di foto ke-{i+1}. Perbaiki masalah, lalu upload ulang dari foto ini.")
+                    break
                 
                 progress_bar.progress((i + 1) / len(foto_baru))
                 
                 if i < len(foto_baru) - 1:
                     time.sleep(1)
             
-            status_text.success(f"✅ Selesai! {sukses} sukses, {gagal} gagal, {gagal_ai} AI tidak tersedia")
+            # === Ringkasan ===
+            if gagal_di is None:
+                status_text.success(f"✅ Semua selesai! {sukses} sukses, {gagal_ai} AI tidak tersedia")
+            else:
+                status_text.warning(f"⚠️ Berhenti di foto ke-{gagal_di}. {sukses} tersimpan sebelum gagal.")
             
             if error_detail:
                 with st.expander(f"❌ Detail Error ({len(error_detail)})", expanded=True):
@@ -382,13 +401,19 @@ if st.session_state.halaman == "upload":
                         st.error(err)
             
             if gagal_ai > 0:
-                st.warning(f"⚠️ **{gagal_ai} foto gagal dianalisa AI.** Cek sheet APIKey.")
+                st.warning(f"⚠️ **{gagal_ai} foto gagal dianalisa AI** (skor 0, tapi tetap tersimpan).")
             
-            if gagal == 0 and gagal_ai == 0:
+            # Clear kalau semua sukses
+            if gagal == 0:
                 st.session_state.uploader_version += 1
                 st.session_state.processed_files = set()
-                time.sleep(2)
+                time.sleep(3)
                 st.rerun()
+            else:
+                if st.button("🔄 Coba Lagi dari Foto yang Gagal", key="btn_retry"):
+                    st.session_state.uploader_version += 1
+                    time.sleep(1)
+                    st.rerun()
     
     st.markdown('</div>', unsafe_allow_html=True)
 
