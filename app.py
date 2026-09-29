@@ -212,7 +212,6 @@ if "kode_sekolah" not in st.session_state: st.session_state.kode_sekolah = "SDN0
 if "nama_enum" not in st.session_state: st.session_state.nama_enum = "Enumerator"
 if "uploader_version" not in st.session_state: st.session_state.uploader_version = 0
 if "processed_files" not in st.session_state: st.session_state.processed_files = set()
-if "last_success_index" not in st.session_state: st.session_state.last_success_index = 0
 
 user = {
     "nama": st.session_state.nama_enum,
@@ -314,7 +313,7 @@ if st.session_state.halaman == "upload":
                 lauk_val = 0
                 ket_val = ""
                 
-                # === 1. AI cek ===
+                # 1. AI cek
                 try:
                     skor_ai = prediksi_skor_dari_foto(foto.getvalue())
                     if skor_ai:
@@ -328,7 +327,7 @@ if st.session_state.halaman == "upload":
                     gagal_ai += 1
                     print(f"[ERROR AI] Foto {i+1}: {e}")
                 
-                # === 2. Hitung ===
+                # 2. Hitung
                 total_awal = ba_nasi + ba_sayur + ba_lauk
                 pn = skor_ke_persentase_sisa(nasi_val)
                 ps = skor_ke_persentase_sisa(sayur_val)
@@ -340,6 +339,7 @@ if st.session_state.halaman == "upload":
                 el = hitung_economic_loss(total_awal, total_sisa, harga_upload)
                 
                 id_siswa_unik = f"{timestamp_id}-{i+1:02d}"
+                link_foto = ""
                 
                 row = {
                     "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -363,24 +363,20 @@ if st.session_state.halaman == "upload":
                     "Economic Loss (Rp)": round(el,0),
                     "Keterangan": ket_val,
                     "Link Foto Sebelum": "",
-                    "Link Foto Sesudah": "",
+                    "Link Foto Sesudah": link_foto,
                 }
                 
-                # === 3. Simpan ke Sheets ===
+                # 3. Simpan ke Sheets
                 try:
                     simpan_data(row)
                     sukses += 1
                     st.session_state.processed_files.add(foto.name)
-                    
-                    # Log sukses
                     log_area.success(f"✅ Foto {i+1} ({foto.name}) — tersimpan!")
                 except Exception as e:
                     gagal += 1
                     error_detail.append(f"Foto {i+1} ({foto.name}): {type(e).__name__}: {str(e)[:100]}")
                     gagal_di = i + 1
                     log_area.error(f"❌ Foto {i+1} ({foto.name}) GAGAL: {str(e)[:80]}")
-                    
-                    # STOP kalau gagal simpan
                     st.error(f"🛑 Proses berhenti di foto ke-{i+1}. Perbaiki masalah, lalu upload ulang dari foto ini.")
                     break
                 
@@ -389,7 +385,7 @@ if st.session_state.halaman == "upload":
                 if i < len(foto_baru) - 1:
                     time.sleep(1)
             
-            # === Ringkasan ===
+            # Ringkasan
             if gagal_di is None:
                 status_text.success(f"✅ Semua selesai! {sukses} sukses, {gagal_ai} AI tidak tersedia")
             else:
