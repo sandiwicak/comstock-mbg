@@ -131,7 +131,7 @@ st.markdown("""
     /* MARKDOWN */
     .stMarkdown p, .stMarkdown li, .stMarkdown span { color: #1a1a1a; }
     
-    /* EXPANDER HITAM */
+        /* EXPANDER HITAM */
     [data-testid="stExpander"] {
         border: 2px solid #1a1a1a !important;
         border-radius: 12px !important;
@@ -148,9 +148,43 @@ st.markdown("""
         fill: #ffffff !important;
         font-weight: 600 !important;
     }
+    
+    /* ISI EXPANDER - SEMUA PUTIH */
     [data-testid="stExpander"] details,
-    [data-testid="stExpander"] details * {
-        color: #1a1a1a !important;
+    [data-testid="stExpander"] details *,
+    [data-testid="stExpander"] details p,
+    [data-testid="stExpander"] details span,
+    [data-testid="stExpander"] details label,
+    [data-testid="stExpander"] details div,
+    [data-testid="stExpander"] [data-testid="stWidgetLabel"],
+    [data-testid="stExpander"] [data-testid="stWidgetLabel"] * {
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+    }
+    
+    /* BORDER INPUT DI DALAM EXPANDER - PUTIH */
+    [data-testid="stExpander"] .stNumberInput > div > div > input,
+    [data-testid="stExpander"] .stTextInput > div > div > input {
+        border: 2px solid #ffffff !important;
+        border-radius: 10px !important;
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+    }
+    
+    /* TOMBOL +- DI DALAM EXPANDER - BORDER PUTIH */
+    [data-testid="stExpander"] .stNumberInput button {
+        border: 2px solid #ffffff !important;
+        border-radius: 6px !important;
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+    }
+    [data-testid="stExpander"] .stNumberInput button:hover {
+        background-color: #c99a3a !important;
+        border-color: #c99a3a !important;
+    }
+    [data-testid="stExpander"] .stNumberInput button svg {
+        fill: #ffffff !important;
     }
     
     /* FILE UPLOADER */
