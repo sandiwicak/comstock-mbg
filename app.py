@@ -72,6 +72,29 @@ st.markdown("""
         border-radius: 10px !important; 
     }
     .stTextInput > div > div > input::placeholder,
+    /* Angka di number input - PUTIH */
+.stNumberInput > div > div > input {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Tombol + dan - di number input - PUTIH */
+.stNumberInput button {
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+    border: 1px solid #333333 !important;
+}
+
+.stNumberInput button:hover {
+    background-color: #c99a3a !important;
+}
+
+.stNumberInput button svg,
+.stNumberInput button p {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+}
     .stNumberInput > div > div > input::placeholder,
     .stTextArea > div > div > textarea::placeholder { color: #888888 !important; -webkit-text-fill-color: #888888 !important; }
     
