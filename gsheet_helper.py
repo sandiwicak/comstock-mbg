@@ -1,8 +1,7 @@
-"""Koneksi & operasi Google Sheets - baca dari Streamlit Secrets."""
+"""Koneksi & operasi Google Sheets."""
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
-import json
 import base64
 
 SHEET_NAME = "Data_Comstock_MBG"
@@ -10,7 +9,7 @@ WORKSHEET_NAME = "Data"
 
 HEADERS = [
     "Timestamp", "Tanggal", "Hari Ke-", "Kode Sekolah", "Nama Sekolah",
-    "Nama Enumerator", "Email Enumerator", "ID Siswa", "Kelas",
+    "Nama Enumerator", "Email Enumerator", "ID Siswa", "Nama Foto", "Kelas",
     "Skor Visual Nasi", "Berat Awal Nasi (g)", "Berat Sisa Nasi (g)", "% Sisa Nasi",
     "Skor Visual Sayur", "Berat Awal Sayur (g)", "Berat Sisa Sayur (g)", "% Sisa Sayur",
     "Skor Visual Lauk", "Berat Awal Lauk (g)", "Berat Sisa Lauk (g)", "% Sisa Lauk",
@@ -62,7 +61,7 @@ def get_or_create_worksheet():
     except gspread.WorksheetNotFound:
         ws = sh.add_worksheet(title=WORKSHEET_NAME, rows=10000, cols=len(HEADERS))
         ws.append_row(HEADERS)
-        ws.format("A1:AB1", {"textFormat": {"bold": True}})
+        ws.format("A1:AC1", {"textFormat": {"bold": True}})
     return ws
 
 
