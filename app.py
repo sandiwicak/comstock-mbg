@@ -9,7 +9,6 @@ from comstock_utils import (
     COMSTOCK_MAPPING, KETERANGAN_SKOR, SEKOLAH_LIST
 )
 from gsheet_helper import simpan_data, ambil_semua_data
-#from gdrive_stub import upload_foto
 from ai_scorer import prediksi_skor_dari_foto
 
 
@@ -62,8 +61,8 @@ st.markdown("""
     .stButton > button:hover { background: #8a5a2b !important; }
     .stButton > button p, .stButton > button span { color: #ffffff !important; }
     
+    /* TEXT INPUT - HITAM BG, PUTIH TEXT */
     .stTextInput > div > div > input,
-    .stNumberInput > div > div > input,
     .stTextArea > div > div > textarea { 
         background-color: #1a1a1a !important; 
         color: #ffffff !important; 
@@ -72,32 +71,39 @@ st.markdown("""
         border-radius: 10px !important; 
     }
     .stTextInput > div > div > input::placeholder,
-    /* Angka di number input - PUTIH */
-.stNumberInput > div > div > input {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    font-weight: 600 !important;
-}
-
-/* Tombol + dan - di number input - PUTIH */
-.stNumberInput button {
-    background-color: #1a1a1a !important;
-    color: #ffffff !important;
-    border: 1px solid #333333 !important;
-}
-
-.stNumberInput button:hover {
-    background-color: #c99a3a !important;
-}
-
-.stNumberInput button svg,
-.stNumberInput button p {
-    fill: #ffffff !important;
-    color: #ffffff !important;
-}
-    .stNumberInput > div > div > input::placeholder,
-    .stTextArea > div > div > textarea::placeholder { color: #888888 !important; -webkit-text-fill-color: #888888 !important; }
+    .stTextArea > div > div > textarea::placeholder { 
+        color: #888888 !important; 
+        -webkit-text-fill-color: #888888 !important; 
+    }
     
+    /* NUMBER INPUT - HITAM BG, PUTIH TEXT, PUTIH TOMBOL +- */
+    .stNumberInput > div > div > input {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+        font-weight: 600 !important;
+        border: 2px solid #1a1a1a !important;
+        border-radius: 10px !important;
+    }
+    .stNumberInput > div > div > input::placeholder {
+        color: #888888 !important;
+        -webkit-text-fill-color: #888888 !important;
+    }
+    .stNumberInput button {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        border: 1px solid #333333 !important;
+    }
+    .stNumberInput button:hover {
+        background-color: #c99a3a !important;
+    }
+    .stNumberInput button svg,
+    .stNumberInput button p {
+        fill: #ffffff !important;
+        color: #ffffff !important;
+    }
+    
+    /* DATE INPUT */
     .stDateInput > div > div > input {
         background-color: #1a1a1a !important;
         color: #ffffff !important;
@@ -106,6 +112,7 @@ st.markdown("""
         border-radius: 10px !important;
     }
     
+    /* SELECTBOX */
     .stSelectbox > div > div { background-color: #1a1a1a !important; border: 2px solid #1a1a1a !important; border-radius: 10px !important; color: #ffffff !important; }
     .stSelectbox [data-baseweb="select"] > div { background-color: #1a1a1a !important; color: #ffffff !important; }
     .stSelectbox [data-baseweb="select"] span { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
@@ -115,8 +122,13 @@ st.markdown("""
     [role="option"]:hover { background-color: #c99a3a !important; color: #1a1a1a !important; }
     [aria-selected="true"] { background-color: #c99a3a !important; color: #1a1a1a !important; }
     
+    /* LABELS */
     .stTextInput label, .stNumberInput label, .stSelectbox label, .stTextArea label, .stFileUploader label, .stDateInput label { color: #1a1a1a !important; font-weight: 600 !important; }
+    
+    /* CAPTION */
     .stCaption, [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] * { color: #5c3a1a !important; font-weight: 500 !important; }
+    
+    /* MARKDOWN */
     .stMarkdown p, .stMarkdown li, .stMarkdown span { color: #1a1a1a; }
     
     /* EXPANDER HITAM */
@@ -141,17 +153,19 @@ st.markdown("""
         color: #1a1a1a !important;
     }
     
+    /* FILE UPLOADER */
     .stFileUploader > div > div { border: 2px dashed #c99a3a !important; border-radius: 12px !important; background: #f6e3b4 !important; }
     .stFileUploader > div > div > div { color: #1a1a1a !important; }
     .stFileUploader button { background-color: #c99a3a !important; color: white !important; border-radius: 10px !important; border: none !important; }
-    
     [data-testid="stFileUploaderFile"], [data-testid="stUploadedFile"], [data-testid="stFileUploaderFileName"] { background-color: #1a1a1a !important; }
     [data-testid="stFileUploaderFile"] *, [data-testid="stUploadedFile"] *, [data-testid="stFileUploaderFileName"] * { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
     [data-testid="stFileUploaderDeleteBtn"] svg { fill: #ffffff !important; }
     
+    /* ALERT */
     .stAlert { border-radius: 12px !important; }
     .stAlert p { color: #1a1a1a !important; }
     
+    /* SIDEBAR */
     section[data-testid="stSidebar"] { background: #efd48a; border-right: 2px solid #c99a3a; }
     section[data-testid="stSidebar"] * { color: #1a1a1a !important; }
     section[data-testid="stSidebar"] .stButton > button { background: white !important; color: #1a1a1a !important; border: 2px solid #8a5a2b !important; border-radius: 12px; margin-bottom: 0.5rem; }
@@ -159,11 +173,14 @@ st.markdown("""
     section[data-testid="stSidebar"] .stButton > button:hover { background: #8a5a2b !important; }
     section[data-testid="stSidebar"] .stButton > button:hover p { color: white !important; }
     
+    /* PROGRESS */
     .stProgress > div > div > div > div { background: #c99a3a !important; }
     
+    /* METRIC NATIVE */
     [data-testid="stMetricValue"] { color: #1a1a1a !important; font-weight: 800 !important; }
     [data-testid="stMetricLabel"] { color: #5c3a1a !important; font-weight: 600 !important; }
     
+    /* DATAFRAME */
     .stDataFrame, .stDataFrame * { color: #1a1a1a; }
     
     #MainMenu, footer, header {visibility: hidden;}
@@ -323,12 +340,8 @@ if st.session_state.halaman == "upload":
                     gagal_ai += 1
                 
                 try:
-                    filename = f"{user['kode_sekolah']}_{tanggal_upload}_{foto.name}"
-                    link_foto = (
-                        foto.getvalue(),
-                        filename,
-                        subfolder=f"{user['kode_sekolah']}/{tanggal_upload}"
-                    )
+                    # TIDAK upload ke Drive - langsung string kosong
+                    link_foto = ""
                     
                     total_awal = ba_nasi + ba_sayur + ba_lauk
                     pn = skor_ke_persentase_sisa(nasi_val)
@@ -455,5 +468,3 @@ elif st.session_state.halaman == "dashboard":
     if st.button("⬅️ Kembali ke Upload", key="btn_kembali"):
         st.session_state.halaman = "upload"
         st.rerun()
-
-# Cache buster: 2026-09-29 14:00
