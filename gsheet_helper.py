@@ -37,9 +37,10 @@ def get_credentials_dict():
 
 
 def get_client():
+    # HANYA SCOPE SHEETS - TANPA DRIVE
     scope = [
         "https://spreadsheets.google.com/feeds",
-        "https://www.googleapis.com/auth/drive"
+        "https://www.googleapis.com/auth/spreadsheets"
     ]
 
     creds_dict = get_credentials_dict()
