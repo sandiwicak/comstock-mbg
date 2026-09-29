@@ -53,17 +53,32 @@ def get_client():
 
 def get_or_create_worksheet():
     client = get_client()
+    
+    # Buka spreadsheet
     try:
         sh = client.open(SHEET_NAME)
     except gspread.SpreadsheetNotFound:
         st.error(f"Spreadsheet '{SHEET_NAME}' tidak ditemukan. Pastikan sudah di-share ke service account.")
         raise
+    
+    # Buka atau buat worksheet
     try:
         ws = sh.worksheet(WORKSHEET_NAME)
     except gspread.WorksheetNotFound:
         ws = sh.add_worksheet(title=WORKSHEET_NAME, rows=10000, cols=len(HEADERS))
         ws.append_row(HEADERS)
         ws.format("A1:AC1", {"textFormat": {"bold": True}})
+        return ws
+    
+    # CEK: Kalau worksheet ada tapi baris 1 KOSONG, isi header otomatis
+    try:
+        first_row = ws.row_values(1)
+        if not first_row or len(first_row) == 0 or all(cell == "" for cell in first_row):
+            ws.append_row(HEADERS)
+            ws.format("A1:AC1", {"textFormat": {"bold": True}})
+    except Exception:
+        pass
+    
     return ws
 
 
