@@ -136,6 +136,7 @@ if "kode_sekolah" not in st.session_state: st.session_state.kode_sekolah = "SDN0
 if "nama_enum" not in st.session_state: st.session_state.nama_enum = "Enumerator"
 if "uploader_version" not in st.session_state: st.session_state.uploader_version = 0
 if "processed_files" not in st.session_state: st.session_state.processed_files = set()
+if "groq_api_key_input" not in st.session_state: st.session_state.groq_api_key_input = ""
 
 user = {
     "nama": st.session_state.nama_enum,
@@ -163,6 +164,26 @@ with st.sidebar:
     user["nama"] = st.session_state.nama_enum
     
     st.markdown("---")
+    
+    # === INPUT GROQ API KEY ===
+    st.markdown("### 🔑 Groq API Key")
+    api_key_input = st.text_input(
+        "Masukkan API Key Groq",
+        value=st.session_state.groq_api_key_input,
+        type="password",
+        key="groq_key_field",
+        placeholder="gsk_...",
+        help="Dapatkan dari https://console.groq.com/keys"
+    )
+    st.session_state.groq_api_key_input = api_key_input.strip() if api_key_input else ""
+    
+    if st.session_state.groq_api_key_input:
+        st.success("✅ API Key tersimpan")
+    else:
+        st.warning("⚠️ Masukkan API Key untuk AI")
+    
+    st.markdown("---")
+    
     if st.button("📸 Upload Foto", key="btn_upload"): 
         st.session_state.halaman = "upload"
         st.rerun()
@@ -180,6 +201,12 @@ st.markdown(f"""
 
 # ==================== HALAMAN UPLOAD ====================
 if st.session_state.halaman == "upload":
+    # Cek API key
+    if not st.session_state.groq_api_key_input:
+        st.error("⚠️ **Masukkan Groq API Key dulu di sidebar kiri** sebelum upload foto.")
+        st.info("Dapatkan API key gratis di: https://console.groq.com/keys")
+        st.stop()
+    
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📸 Upload Foto Sisa</div>', unsafe_allow_html=True)
     st.caption("Upload foto → langsung diproses AI + disimpan otomatis.")
@@ -211,9 +238,7 @@ if st.session_state.halaman == "upload":
         label_visibility="collapsed"
     )
     
-    # Kalau ada foto baru (belum diproses), langsung proses
     if foto_list:
-        # Filter foto yang belum diproses
         foto_baru = [f for f in foto_list if f.name not in st.session_state.processed_files]
         
         if foto_baru:
@@ -224,8 +249,8 @@ if st.session_state.halaman == "upload":
             
             sukses = 0
             gagal = 0
-            error_detail = []
             gagal_ai = 0
+            error_detail = []
             
             for i, foto in enumerate(foto_baru):
                 status_text.info(f"⏳ Memproses {i+1}/{len(foto_baru)}: {foto.name}")
@@ -234,6 +259,7 @@ if st.session_state.halaman == "upload":
                 sayur_val = 0
                 lauk_val = 0
                 ket_val = ""
+                ai_gagal = False
                 
                 try:
                     skor_ai = prediksi_skor_dari_foto(foto.getvalue())
@@ -244,8 +270,10 @@ if st.session_state.halaman == "upload":
                         ket_val = skor_ai.get("alasan", "")
                     else:
                         gagal_ai += 1
+                        ai_gagal = True
                 except Exception:
                     gagal_ai += 1
+                    ai_gagal = True
                 
                 try:
                     filename = f"{user['kode_sekolah']}_{tanggal_upload}_{foto.name}"
@@ -274,6 +302,7 @@ if st.session_state.halaman == "upload":
                         "Nama Enumerator": user['nama'],
                         "Email Enumerator": user.get('email', '-'),
                         "ID Siswa": str(len(st.session_state.processed_files) + i + 1),
+                        "Nama Foto": foto.name,
                         "Kelas": "-",
                         "Skor Visual Nasi": nasi_val, "Berat Awal Nasi (g)": ba_nasi,
                         "Berat Sisa Nasi (g)": round(bsn,1), "% Sisa Nasi": round(pn,4),
@@ -307,7 +336,12 @@ if st.session_state.halaman == "upload":
                     for err in error_detail:
                         st.error(err)
             
-            # Kalau semua sukses, clear dan reset uploader
+            # Kalau AI gagal, minta ganti API key
+            if gagal_ai > 0:
+                st.warning(f"⚠️ **{gagal_ai} foto gagal dianalisa AI.** Kemungkinan quota habis atau API key invalid.")
+                st.info("💡 **Ganti API Key Groq** di sidebar kiri, lalu upload ulang foto yang gagal.")
+            
+            # Clear kalau sukses semua
             if gagal == 0 and gagal_ai == 0:
                 st.session_state.uploader_version += 1
                 st.session_state.processed_files = set()
