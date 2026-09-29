@@ -9,7 +9,7 @@ from comstock_utils import (
     COMSTOCK_MAPPING, KETERANGAN_SKOR, SEKOLAH_LIST
 )
 from gsheet_helper import simpan_data, ambil_semua_data
-from gdrive_stub import upload_foto
+#from gdrive_stub import upload_foto
 from ai_scorer import prediksi_skor_dari_foto
 
 
@@ -324,7 +324,7 @@ if st.session_state.halaman == "upload":
                 
                 try:
                     filename = f"{user['kode_sekolah']}_{tanggal_upload}_{foto.name}"
-                    link_foto = upload_foto(
+                    link_foto = (
                         foto.getvalue(),
                         filename,
                         subfolder=f"{user['kode_sekolah']}/{tanggal_upload}"
