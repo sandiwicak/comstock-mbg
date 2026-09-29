@@ -9,7 +9,7 @@ from comstock_utils import (
     COMSTOCK_MAPPING, KETERANGAN_SKOR, SEKOLAH_LIST
 )
 from gsheet_helper import simpan_data, ambil_semua_data
-from gdrive_helper import upload_foto
+from gdrive_stub import upload_foto
 from ai_scorer import prediksi_skor_dari_foto
 
 
