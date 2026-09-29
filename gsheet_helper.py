@@ -37,10 +37,10 @@ def get_credentials_dict():
 
 
 def get_client():
-    # HANYA SCOPE SHEETS - TANPA DRIVE
     scope = [
         "https://spreadsheets.google.com/feeds",
-        "https://www.googleapis.com/auth/spreadsheets"
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
     ]
 
     creds_dict = get_credentials_dict()
@@ -56,7 +56,8 @@ def get_or_create_worksheet():
     try:
         sh = client.open(SHEET_NAME)
     except gspread.SpreadsheetNotFound:
-        sh = client.create(SHEET_NAME)
+        st.error(f"Spreadsheet '{SHEET_NAME}' tidak ditemukan. Pastikan sudah di-share ke service account.")
+        raise
     try:
         ws = sh.worksheet(WORKSHEET_NAME)
     except gspread.WorksheetNotFound:
