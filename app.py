@@ -455,3 +455,5 @@ elif st.session_state.halaman == "dashboard":
     if st.button("⬅️ Kembali ke Upload", key="btn_kembali"):
         st.session_state.halaman = "upload"
         st.rerun()
+
+# Cache buster: 2026-09-29 14:00
