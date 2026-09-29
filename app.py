@@ -85,7 +85,7 @@ user = {
     "email": "-"
 }
 
-# Sidebar
+# Sidebar (tanpa API key)
 with st.sidebar:
     st.markdown("### 🏫 Pilih Sekolah")
     sekolah_options = list(SEKOLAH_LIST.keys())
@@ -105,23 +105,6 @@ with st.sidebar:
     user["nama"] = st.session_state.nama_enum
     
     st.markdown("---")
-    st.markdown("### 🔑 Groq API Key")
-    api_key_input = st.text_input(
-        "Masukkan API Key Groq",
-        value=st.session_state.groq_api_key_input,
-        type="password",
-        key="groq_key_field",
-        placeholder="gsk_...",
-        help="Dapatkan dari https://console.groq.com/keys"
-    )
-    st.session_state.groq_api_key_input = api_key_input.strip() if api_key_input else ""
-    
-    if st.session_state.groq_api_key_input:
-        st.success("✅ API Key tersimpan")
-    else:
-        st.warning("⚠️ Masukkan API Key untuk AI")
-    
-    st.markdown("---")
     if st.button("📸 Upload Foto", key="btn_upload"): 
         st.session_state.halaman = "upload"
         st.rerun()
@@ -137,15 +120,41 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# ==================== INPUT API KEY DI HALAMAN UTAMA ====================
+if not st.session_state.groq_api_key_input:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">🔑 Masukkan Groq API Key</div>', unsafe_allow_html=True)
+    st.warning("⚠️ **API Key wajib diisi** untuk menjalankan AI. Dapatkan gratis di: https://console.groq.com/keys")
+    
+    api_key_input = st.text_input(
+        "Groq API Key",
+        value="",
+        type="password",
+        key="api_key_field",
+        placeholder="gsk_... (paste di sini)"
+    )
+    
+    if api_key_input:
+        st.session_state.groq_api_key_input = api_key_input.strip()
+        st.success("✅ API Key tersimpan! Halaman akan reload...")
+        time.sleep(1)
+        st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
+
 # ==================== HALAMAN UPLOAD ====================
 if st.session_state.halaman == "upload":
-    if not st.session_state.groq_api_key_input:
-        st.error("⚠️ **Masukkan Groq API Key dulu di sidebar kiri** sebelum upload foto.")
-        st.info("Dapatkan API key gratis di: https://console.groq.com/keys")
-        st.stop()
-    
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">📸 Upload Foto Sisa</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown('<div class="section-title">📸 Upload Foto Sisa</div>', unsafe_allow_html=True)
+    with col2:
+        if st.button("🔑 Ganti API Key", key="btn_ganti_key"):
+            st.session_state.groq_api_key_input = ""
+            st.rerun()
+    
     st.caption("Upload foto → langsung diproses AI + disimpan otomatis.")
     
     col1, col2, col3 = st.columns(3)
@@ -271,8 +280,8 @@ if st.session_state.halaman == "upload":
                         st.error(err)
             
             if gagal_ai > 0:
-                st.warning(f"⚠️ **{gagal_ai} foto gagal dianalisa AI.** Kemungkinan quota habis atau API key invalid.")
-                st.info("💡 **Ganti API Key Groq** di sidebar kiri, lalu upload ulang foto yang gagal.")
+                st.warning(f"⚠️ **{gagal_ai} foto gagal dianalisa AI.** Kemungkinan quota habis.")
+                st.info("💡 **Klik tombol '🔑 Ganti API Key' di atas** untuk ganti key, lalu upload ulang.")
             
             if gagal == 0 and gagal_ai == 0:
                 st.session_state.uploader_version += 1
