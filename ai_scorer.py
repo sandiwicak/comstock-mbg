@@ -1,4 +1,4 @@
-"""AI Scorer - Groq Vision API dengan API key dinamis."""
+"""AI Scorer - Groq Vision API."""
 import requests
 import base64
 import json
@@ -10,12 +10,9 @@ import streamlit as st
 
 
 def get_groq_key():
-    """Ambil API key dari session state (input user) atau config.json."""
-    # Prioritas 1: session state (input user)
     if "groq_api_key_input" in st.session_state and st.session_state.groq_api_key_input:
         return st.session_state.groq_api_key_input.strip()
     
-    # Prioritas 2: config.json
     if os.path.exists("config.json"):
         with open("config.json") as f:
             config = json.load(f)
@@ -41,7 +38,6 @@ def compress_image(image_bytes, max_size=640, quality=70):
 
 
 def prediksi_skor_dari_foto(image_bytes):
-    """Coba 5x dengan 3 model. Return dict atau None."""
     try:
         api_key = get_groq_key()
         if not api_key:
@@ -100,14 +96,10 @@ def prediksi_skor_dari_foto(image_bytes):
                         return json.loads(text)
 
                     elif response.status_code == 429:
-                        # Rate limit / quota habis
-                        print(f"[AI] 429 rate limit, tunggu 8s...")
                         time.sleep(8)
                         continue
 
                     elif response.status_code == 401:
-                        # API key invalid
-                        print(f"[AI] 401 invalid API key!")
                         return None
 
                     else:
