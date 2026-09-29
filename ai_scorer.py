@@ -1,4 +1,4 @@
-"""AI Scorer - Groq Vision API dengan auto-retry."""
+"""AI Scorer - Groq Vision API dengan API key dinamis."""
 import requests
 import base64
 import json
@@ -6,13 +6,21 @@ import os
 import time
 from PIL import Image
 from io import BytesIO
+import streamlit as st
 
 
 def get_groq_key():
+    """Ambil API key dari session state (input user) atau config.json."""
+    # Prioritas 1: session state (input user)
+    if "groq_api_key_input" in st.session_state and st.session_state.groq_api_key_input:
+        return st.session_state.groq_api_key_input.strip()
+    
+    # Prioritas 2: config.json
     if os.path.exists("config.json"):
         with open("config.json") as f:
             config = json.load(f)
             return config.get("groq_api_key", "")
+    
     return ""
 
 
@@ -33,7 +41,7 @@ def compress_image(image_bytes, max_size=640, quality=70):
 
 
 def prediksi_skor_dari_foto(image_bytes):
-    """Coba 5x dengan 3 model berbeda. Return dict atau None."""
+    """Coba 5x dengan 3 model. Return dict atau None."""
     try:
         api_key = get_groq_key()
         if not api_key:
@@ -63,7 +71,6 @@ def prediksi_skor_dari_foto(image_bytes):
             "Authorization": "Bearer " + api_key
         }
 
-        # RETRY 5x dengan 3 model
         for attempt in range(5):
             for model in models:
                 try:
@@ -90,37 +97,28 @@ def prediksi_skor_dari_foto(image_bytes):
                             if text.startswith("json"):
                                 text = text[4:]
                         text = text.strip()
-                        result = json.loads(text)
-                        print(f"[AI] ✅ Sukses dengan {model} (attempt {attempt+1})")
-                        return result
+                        return json.loads(text)
 
                     elif response.status_code == 429:
-                        # Rate limit, tunggu lebih lama
+                        # Rate limit / quota habis
+                        print(f"[AI] 429 rate limit, tunggu 8s...")
                         time.sleep(8)
                         continue
 
-                    elif response.status_code == 404:
-                        # Model tidak ada, langsung coba model berikutnya
-                        continue
+                    elif response.status_code == 401:
+                        # API key invalid
+                        print(f"[AI] 401 invalid API key!")
+                        return None
 
                     else:
-                        # Error lain, tunggu sebentar
                         time.sleep(3)
                         continue
 
-                except requests.exceptions.Timeout:
-                    time.sleep(3)
-                    continue
-                except json.JSONDecodeError:
-                    time.sleep(2)
-                    continue
                 except Exception:
                     continue
 
-            # Jeda antar attempt
             time.sleep(3)
 
-        print("[AI] ❌ Gagal semua attempt")
         return None
 
     except Exception:
