@@ -6,6 +6,7 @@ import base64
 
 SHEET_NAME = "Data_Comstock_MBG"
 WORKSHEET_NAME = "Data"
+APIKEY_WORKSHEET = "APIKey"
 
 HEADERS = [
     "Timestamp", "Tanggal", "Hari Ke-", "Kode Sekolah", "Nama Sekolah",
@@ -53,15 +54,11 @@ def get_client():
 
 def get_or_create_worksheet():
     client = get_client()
-    
-    # Buka spreadsheet
     try:
         sh = client.open(SHEET_NAME)
     except gspread.SpreadsheetNotFound:
         st.error(f"Spreadsheet '{SHEET_NAME}' tidak ditemukan. Pastikan sudah di-share ke service account.")
         raise
-    
-    # Buka atau buat worksheet
     try:
         ws = sh.worksheet(WORKSHEET_NAME)
     except gspread.WorksheetNotFound:
@@ -70,7 +67,7 @@ def get_or_create_worksheet():
         ws.format("A1:AC1", {"textFormat": {"bold": True}})
         return ws
     
-    # CEK: Kalau worksheet ada tapi baris 1 KOSONG, isi header otomatis
+    # Cek kalau worksheet ada tapi baris 1 KOSONG, isi header otomatis
     try:
         first_row = ws.row_values(1)
         if not first_row or len(first_row) == 0 or all(cell == "" for cell in first_row):
@@ -92,3 +89,24 @@ def simpan_data(row_dict: dict):
 def ambil_semua_data() -> list:
     ws = get_or_create_worksheet()
     return ws.get_all_records()
+
+
+def ambil_api_keys() -> list:
+    """Ambil semua API key Groq dari sheet 'APIKey'."""
+    try:
+        client = get_client()
+        sh = client.open(SHEET_NAME)
+        ws = sh.worksheet(APIKEY_WORKSHEET)
+        records = ws.get_all_records()
+        
+        keys = []
+        for row in records:
+            api_key = str(row.get("api_key", "")).strip()
+            status = str(row.get("status", "active")).strip().lower()
+            if api_key and api_key.startswith("gsk_") and status == "active":
+                keys.append(api_key)
+        
+        return keys
+    except Exception as e:
+        print(f"[APIKey] Gagal baca sheet APIKey: {e}")
+        return []
